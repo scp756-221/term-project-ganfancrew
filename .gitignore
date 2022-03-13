@@ -6,7 +6,7 @@ mk.mak
 gcp.mak
 allclouds.mak
 api.mak
-.DS_Store
+#.DS_Store
 __pycache--
 ###########
 
