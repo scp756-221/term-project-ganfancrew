@@ -44,14 +44,6 @@ db = {
 }
 bp = Blueprint('app', __name__)
 
-def load_db():
-    global db
-    with open(DB_PATH, 'r') as inp:
-        rdr = csv.reader(inp)
-        next(rdr)  # Skip header line
-        for artist, songtitle, id in rdr:
-            db[id] = (artist, songtitle)
-
 
 @bp.route('/health')
 def health():
@@ -218,7 +210,6 @@ if __name__ == '__main__':
         logging.error("missing port arg 1")
         sys.exit(-1)
 
-    load_db()
-    app.logger.error("Unique code: {}".format(ucode))
+    # app.logger.error("Unique code: {}".format(ucode))
     p = int(sys.argv[1])
     app.run(host='0.0.0.0', port=p, threaded=True)
