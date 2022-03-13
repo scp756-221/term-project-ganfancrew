@@ -44,98 +44,173 @@ db = {
 }
 bp = Blueprint('app', __name__)
 
+def load_db():
+    global db
+    with open(DB_PATH, 'r') as inp:
+        rdr = csv.reader(inp)
+        next(rdr)  # Skip header line
+        for artist, songtitle, id in rdr:
+            db[id] = (artist, songtitle)
+
 
 @bp.route('/health')
-@metrics.do_not_track()
 def health():
-    return Response("", status=200, mimetype="application/json")
+    return ""
 
 
 @bp.route('/readiness')
-@metrics.do_not_track()
 def readiness():
-    return Response("", status=200, mimetype="application/json")
+    return ""
 
 
 @bp.route('/', methods=['GET'])
 def list_all():
-    headers = request.headers
-    # check header here
-    if 'Authorization' not in headers:
-        return Response(json.dumps({"error": "missing auth"}),
-                        status=401,
-                        mimetype='application/json')
-    # list all songs here
-    return {}
+    global database
+    response = {
+        "Count": len(database),
+        "Items":
+            [{'Artist': value[0], 'SongTitle': value[1], 'music_id': id}
+             for id, value in database.items()]
+    }
+    return response
 
+@bp.route('/sort', methods=['GET'])
+def list_all_sort():
+    global database
+    response = {
+        "Count": len(database),
+        "Items":
+            [{'Artist': value[0], 'SongTitle': value[1], 'music_id': id}
+             for id, value in database.items()]
+    }
+    lists = response["Items"]
+    lists.sort(key = lambda x:x['SongTitle'], reverse=True)
+    r = {
+        "Count": len(database),
+        "Items": lists
+    }
+    print(r)
+    return r
+
+@bp.route('/artist/<artist>', methods=['GET'])
+def list_artist(artist):
+    #print(artist)
+    global database
+    response = {
+        "Count": len(database),
+        "Items":
+            [{'Artist': value[0], 'SongTitle': value[1], 'music_id': id}
+             for id, value in database.items()]
+    }
+    lists = response["Items"]
+    items = []
+    for i in lists:
+        if i['Artist'] == artist.strip():
+            tmpItem = {}
+            tmpItem["music_id"] = i['music_id']
+            tmpItem["Artist"] = i['Artist']
+            tmpItem["SongTitle"] = i['SongTitle']
+            items.append(tmpItem)
+            #print("{}  {:20.20s} {}".format(i['music_id'],i['Artist'],i['SongTitle']))
+
+    #print(items)
+    r = {
+        "Count": len(items),
+        "Items": items
+    }
+    print(r)
+    return r
+
+@bp.route('/deleteAll', methods=['GET'])
+def delete_song_all():
+    global database
+    response = {
+        "Count": len(database),
+        "Items":
+            [{'Artist': value[0], 'SongTitle': value[1], 'music_id': id}
+             for id, value in database.items()]
+    }
+    lists = response["Items"]
+    for i in lists:
+        print(i['music_id'])
+        delete_song(i['music_id'])
+
+
+    return ''
 
 @bp.route('/<music_id>', methods=['GET'])
 def get_song(music_id):
-    headers = request.headers
-    # check header here
-    if 'Authorization' not in headers:
-        return Response(json.dumps({"error": "missing auth"}),
-                        status=401,
-                        mimetype='application/json')
-    payload = {"objtype": "music", "objkey": music_id}
-    url = db['name'] + '/' + db['endpoint'][0]
-    response = requests.get(
-        url,
-        params=payload,
-        headers={'Authorization': headers['Authorization']})
-    return (response.json())
+    global database
+    if music_id in database:
+        value = database[music_id]
+        response = {
+            "Count": 1,
+            "Items":
+                [{'Artist': value[0],
+                  'SongTitle': value[1],
+                  'music_id': music_id}]
+        }
+    else:
+        response = {
+            "Count": 0,
+            "Items": []
+        }
+        return app.make_response((response, 404))
+    return response
 
 
 @bp.route('/', methods=['POST'])
 def create_song():
-    headers = request.headers
-    # check header here
-    if 'Authorization' not in headers:
-        return Response(json.dumps({"error": "missing auth"}),
-                        status=401,
-                        mimetype='application/json')
+    global database
     try:
         content = request.get_json()
         Artist = content['Artist']
         SongTitle = content['SongTitle']
     except Exception:
-        return json.dumps({"message": "error reading arguments"})
-    url = db['name'] + '/' + db['endpoint'][1]
-    response = requests.post(
-        url,
-        json={"objtype": "music", "Artist": Artist, "SongTitle": SongTitle},
-        headers={'Authorization': headers['Authorization']})
-    return (response.json())
+        return app.make_response(
+            ({"Message": "Error reading arguments"}, 400)
+            )
+    music_id = str(uuid.uuid4())
+    database[music_id] = (Artist, SongTitle)
+    response = {
+        "music_id": music_id
+    }
+    return response
 
 
 @bp.route('/<music_id>', methods=['DELETE'])
 def delete_song(music_id):
-    headers = request.headers
-    # check header here
-    if 'Authorization' not in headers:
-        return Response(json.dumps({"error": "missing auth"}),
-                        status=401,
-                        mimetype='application/json')
-    url = db['name'] + '/' + db['endpoint'][2]
-    response = requests.delete(
-        url,
-        params={"objtype": "music", "objkey": music_id},
-        headers={'Authorization': headers['Authorization']})
-    return (response.json())
+    global database
+    if music_id in database:
+        del database[music_id]
+    else:
+        response = {
+            "Count": 0,
+            "Items": []
+        }
+        return app.make_response((response, 404))
+    return {}
 
 
 @bp.route('/test', methods=['GET'])
 def test():
     # This value is for user scp756-221
-    if ('1e8c14f082761c9e2e96ceab1f4efb17702cae5c79437883543acdf4c2982dc4' !=
+    if ('a7a2998d24e65de2f79f5696e3ab088dea3821111756d9fb6e58c8eaaff74644' !=
             ucode):
         raise Exception("Test failed")
     return {}
 
 
-# All database calls will have this prefix.  Prometheus metric
-# calls will not---they will have route '/metrics'.  This is
-# the conventional organization.
+@bp.route('/shutdown', methods=['GET'])
+def shutdown():
+    # From https://stackoverflow.com/questions/15562446/how-to-stop-flask-application-without-using-ctrl-c # noqa: E501
+    func = request.environ.get('werkzeug.server.shutdown')
+    if func is None:
+        raise RuntimeError('Not running with the Werkzeug Server')
+    func()
+    return {}
+
+
 app.register_blueprint(bp, url_prefix='/api/v1/playlist/')
 
 if __name__ == '__main__':
@@ -143,7 +218,7 @@ if __name__ == '__main__':
         logging.error("missing port arg 1")
         sys.exit(-1)
 
+    load_db()
     app.logger.error("Unique code: {}".format(ucode))
     p = int(sys.argv[1])
-    # Do not set debug=True---that will disable the Prometheus metrics
     app.run(host='0.0.0.0', port=p, threaded=True)
