@@ -33,7 +33,7 @@ def parse_args():
 
 
 def get_url(name, port):
-    return "http://{}:{}/api/v1/music/".format(name, port)
+    return "http://{}:{}/api/v1/playlist/".format(name, port)
 
 
 def parse_quoted_strings(arg):
@@ -101,6 +101,7 @@ Enter 'help' for command list.
                 i['Artist'],
                 i['SongTitle']))
 
+       
     def do_create(self, arg):
         """
         Add a song to the database.
@@ -132,6 +133,24 @@ Enter 'help' for command list.
             headers={'Authorization': DEFAULT_AUTH}
         )
         print(r.json())
+    
+    def do_create_playlist(self,arg):
+        url = get_url(self.name, self.port)
+        args = parse_quoted_strings(arg)
+        payload = {
+            'Playlist': args[0]
+        }
+        r = requests.post(
+            url,
+            json=payload,
+            headers={'Authorization': DEFAULT_AUTH}
+        )
+        if r.status_code != 200:
+            print("Non-successful status code: {}, {}"
+                    .format(r.status_code, r.json()["error"]))
+        else:
+            print(r.json())
+
 
     def do_delete(self, arg):
         """
@@ -172,6 +191,7 @@ Enter 'help' for command list.
             )
         if r.status_code != 200:
             print("Non-successful status code:", r.status_code)
+
 
     def do_shutdown(self, arg):
         """

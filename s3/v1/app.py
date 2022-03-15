@@ -46,143 +46,49 @@ bp = Blueprint('app', __name__)
 
 
 @bp.route('/health')
+@metrics.do_not_track()
 def health():
-    return ""
+    return Response("", status=200, mimetype="application/json")
 
 
 @bp.route('/readiness')
+@metrics.do_not_track()
 def readiness():
-    return ""
+    return Response("", status=200, mimetype="application/json")
 
 
 @bp.route('/', methods=['GET'])
 def list_all():
-    global database
-    response = {
-        "Count": len(database),
-        "Items":
-            [{'Artist': value[0], 'SongTitle': value[1], 'music_id': id}
-             for id, value in database.items()]
-    }
-    return response
-
-@bp.route('/sort', methods=['GET'])
-def list_all_sort():
-    global database
-    response = {
-        "Count": len(database),
-        "Items":
-            [{'Artist': value[0], 'SongTitle': value[1], 'music_id': id}
-             for id, value in database.items()]
-    }
-    lists = response["Items"]
-    lists.sort(key = lambda x:x['SongTitle'], reverse=True)
-    r = {
-        "Count": len(database),
-        "Items": lists
-    }
-    print(r)
-    return r
-
-@bp.route('/artist/<artist>', methods=['GET'])
-def list_artist(artist):
-    #print(artist)
-    global database
-    response = {
-        "Count": len(database),
-        "Items":
-            [{'Artist': value[0], 'SongTitle': value[1], 'music_id': id}
-             for id, value in database.items()]
-    }
-    lists = response["Items"]
-    items = []
-    for i in lists:
-        if i['Artist'] == artist.strip():
-            tmpItem = {}
-            tmpItem["music_id"] = i['music_id']
-            tmpItem["Artist"] = i['Artist']
-            tmpItem["SongTitle"] = i['SongTitle']
-            items.append(tmpItem)
-            #print("{}  {:20.20s} {}".format(i['music_id'],i['Artist'],i['SongTitle']))
-
-    #print(items)
-    r = {
-        "Count": len(items),
-        "Items": items
-    }
-    print(r)
-    return r
-
-@bp.route('/deleteAll', methods=['GET'])
-def delete_song_all():
-    global database
-    response = {
-        "Count": len(database),
-        "Items":
-            [{'Artist': value[0], 'SongTitle': value[1], 'music_id': id}
-             for id, value in database.items()]
-    }
-    lists = response["Items"]
-    for i in lists:
-        print(i['music_id'])
-        delete_song(i['music_id'])
-
-
-    return ''
-
-@bp.route('/<music_id>', methods=['GET'])
-def get_song(music_id):
-    global database
-    if music_id in database:
-        value = database[music_id]
-        response = {
-            "Count": 1,
-            "Items":
-                [{'Artist': value[0],
-                  'SongTitle': value[1],
-                  'music_id': music_id}]
-        }
-    else:
-        response = {
-            "Count": 0,
-            "Items": []
-        }
-        return app.make_response((response, 404))
-    return response
+    headers = request.headers
+    # check header here
+    if 'Authorization' not in headers:
+        return Response(json.dumps({"error": "missing auth"}),
+                        status=401,
+                        mimetype='application/json')
+    # list all songs here
+    return {}
 
 
 @bp.route('/', methods=['POST'])
-def create_song():
-    global database
+def create_playlist():
+    headers = request.headers
+
+    if 'Authorization' not in headers:
+        return Response(json.dumps({"error": "missing auth"}),
+                        status=401,
+                        mimetype='application/json')  
     try:
         content = request.get_json()
-        Artist = content['Artist']
-        SongTitle = content['SongTitle']
+        Playlist = content['Playlist']
     except Exception:
-        return app.make_response(
-            ({"Message": "Error reading arguments"}, 400)
-            )
-    music_id = str(uuid.uuid4())
-    database[music_id] = (Artist, SongTitle)
-    response = {
-        "music_id": music_id
-    }
-    return response
-
-
-@bp.route('/<music_id>', methods=['DELETE'])
-def delete_song(music_id):
-    global database
-    if music_id in database:
-        del database[music_id]
-    else:
-        response = {
-            "Count": 0,
-            "Items": []
-        }
-        return app.make_response((response, 404))
-    return {}
-
+        return json.dumps({"message": "error reading arguments"})
+    url = db['name'] + '/' + db['endpoint'][1]
+    response = requests.post(
+        url,
+        json={"objtype": "playlist", "Playlist": Playlist},
+        headers={'Authorization': headers['Authorization']})
+    return (response.json())
+        
 
 @bp.route('/test', methods=['GET'])
 def test():
