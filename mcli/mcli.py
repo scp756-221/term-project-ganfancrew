@@ -1,5 +1,5 @@
 """
-Simple command-line interface to music service
+Simple command-line interface to playlist service
 """
 
 # Standard library modules
@@ -18,16 +18,16 @@ DEFAULT_AUTH = 'Bearer A'
 def parse_args():
     argp = argparse.ArgumentParser(
         'mcli',
-        description='Command-line query interface to music service'
+        description='Command-line query interface to playlist service'
         )
     argp.add_argument(
         'name',
-        help="DNS name or IP address of music server"
+        help="DNS name or IP address of playlist server"
         )
     argp.add_argument(
         'port',
         type=int,
-        help="Port number of music server"
+        help="Port number of playlist server"
         )
     return argp.parse_args()
 
@@ -55,7 +55,7 @@ class Mcli(cmd.Cmd):
         cmd.Cmd.__init__(self)
         self.prompt = 'mql: '
         self.intro = """
-Command-line interface to music service.
+Command-line interface to playlist service.
 Enter 'help' for command list.
 'Tab' character autocompletes commands.
 """
@@ -66,8 +66,8 @@ Enter 'help' for command list.
 
         Parameters
         ----------
-        song:  music_id (optional)
-            The music_id of the song to read. If not specified,
+        song:  playlist_id (optional)
+            The playlist_id of the song to read. If not specified,
             all songs are listed.
 
         Examples
@@ -96,13 +96,13 @@ Enter 'help' for command list.
             return
         print("{} items returned".format(items['Count']))
         for i in items['Items']:
-            print("{}  {:20.20s} {}".format(
-                i['music_id'],
+            print("{} {:20.20s} {}".format(
+                i['playlist_id'],
                 i['Artist'],
                 i['SongTitle']))
 
        
-    def do_create(self, arg):
+    def do_add_song(self, arg):
         """
         Add a song to the database.
 
@@ -134,22 +134,23 @@ Enter 'help' for command list.
         )
         print(r.json())
     
-    def do_create_playlist(self,arg):
-        url = get_url(self.name, self.port)
-        args = parse_quoted_strings(arg)
-        payload = {
-            'Playlist': args[0]
-        }
-        r = requests.post(
-            url,
-            json=payload,
-            headers={'Authorization': DEFAULT_AUTH}
-        )
-        if r.status_code != 200:
-            print("Non-successful status code: {}, {}"
-                    .format(r.status_code, r.json()["error"]))
-        else:
-            print(r.json())
+    # def do_create_playlist(self,arg):
+    #     url = get_url(self.name, self.port)
+    #     args = parse_quoted_strings(arg)
+    #     payload = {
+    #         'Artist': args[0],
+    #         'SongTitle': args[1]
+    #     }
+    #     r = requests.post(
+    #         url,
+    #         json=payload,
+    #         headers={'Authorization': DEFAULT_AUTH}
+    #     )
+    #     if r.status_code != 200:
+    #         print("Non-successful status code: {}, {}"
+    #                 .format(r.status_code, r.json()["error"]))
+    #     else:
+    #         print(r.json())
 
 
     def do_delete(self, arg):
@@ -158,8 +159,8 @@ Enter 'help' for command list.
 
         Parameters
         ----------
-        song: music_id
-            The music_id of the song to delete.
+        song: playlist_id
+            The playlist_id of the song to delete.
 
         Examples
         --------
@@ -180,22 +181,22 @@ Enter 'help' for command list.
         """
         return True
 
-    def do_test(self, arg):
-        """
-        Run a test stub on the music server.
-        """
-        url = get_url(self.name, self.port)
-        r = requests.get(
-            url+'test',
-            headers={'Authorization': DEFAULT_AUTH}
-            )
-        if r.status_code != 200:
-            print("Non-successful status code:", r.status_code)
+    # def do_test(self, arg):
+    #     """
+    #     Run a test stub on the playlist server.
+    #     """
+    #     url = get_url(self.name, self.port)
+    #     r = requests.get(
+    #         url+'test',
+    #         headers={'Authorization': DEFAULT_AUTH}
+    #         )
+    #     if r.status_code != 200:
+    #         print("Non-successful status code:", r.status_code)
 
 
     def do_shutdown(self, arg):
         """
-        Tell the music cerver to shut down.
+        Tell the playlist cerver to shut down.
         """
         url = get_url(self.name, self.port)
         r = requests.get(

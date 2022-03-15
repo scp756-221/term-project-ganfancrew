@@ -68,9 +68,24 @@ def list_all():
     # list all songs here
     return {}
 
+@bp.route('/<playlist_id>', methods=['GET'])
+def get_song(playlist_id):
+    headers = request.headers
+    # check header here
+    if 'Authorization' not in headers:
+        return Response(json.dumps({"error": "missing auth"}),
+                        status=401,
+                        mimetype='application/json')
+    payload = {"objtype": "playlist", "objkey": playlist_id}
+    url = db['name'] + '/' + db['endpoint'][0]
+    response = requests.get(
+        url,
+        params=payload,
+        headers={'Authorization': headers['Authorization']})
+    return (response.json())
 
 @bp.route('/', methods=['POST'])
-def create_playlist():
+def add_song():
     headers = request.headers
 
     if 'Authorization' not in headers:
@@ -79,24 +94,25 @@ def create_playlist():
                         mimetype='application/json')  
     try:
         content = request.get_json()
-        Playlist = content['Playlist']
+        Artist = content['Artist']
+        SongTitle = content['SongTitle']
     except Exception:
         return json.dumps({"message": "error reading arguments"})
     url = db['name'] + '/' + db['endpoint'][1]
     response = requests.post(
         url,
-        json={"objtype": "playlist", "Playlist": Playlist},
+        json={"objtype": "playlist",  "Artist": Artist, "SongTitle": SongTitle},
         headers={'Authorization': headers['Authorization']})
     return (response.json())
         
 
-@bp.route('/test', methods=['GET'])
-def test():
-    # This value is for user scp756-221
-    if ('a7a2998d24e65de2f79f5696e3ab088dea3821111756d9fb6e58c8eaaff74644' !=
-            ucode):
-        raise Exception("Test failed")
-    return {}
+# @bp.route('/test', methods=['GET'])
+# def test():
+#     # This value is for user scp756-221
+#     if ('a7a2998d24e65de2f79f5696e3ab088dea3821111756d9fb6e58c8eaaff74644' !=
+#             ucode):
+#         raise Exception("Test failed")
+#     return {}
 
 
 @bp.route('/shutdown', methods=['GET'])
