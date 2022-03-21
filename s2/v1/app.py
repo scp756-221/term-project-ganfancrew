@@ -44,6 +44,7 @@ db = {
 }
 bp = Blueprint('app', __name__)
 
+
 @bp.route('/health')
 @metrics.do_not_track()
 def health():

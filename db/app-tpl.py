@@ -113,8 +113,9 @@ def readplaylist():
     objkey = urllib.parse.unquote_plus(request.args.get('objkey'))
     table_name = objtype.capitalize()+"-ZZ-REG-ID"
     table = dynamodb.Table(table_name)
-    response = table.query(Select='ALL_ATTRIBUTES',
-                           KeyConditionExpression=Key('PlaylistTitle').eq(objkey))
+    response = table.query(
+        Select='ALL_ATTRIBUTES',
+        KeyConditionExpression=Key('PlaylistTitle').eq(objkey))
     return response
 
 
@@ -253,7 +254,7 @@ def loadplaylist():
     if 'uuid' not in content:
         return json.dumps({"http_status_code": 400, "reason": 'Missing uuid'})
     if 'PlaylistTitle' not in content:
-        return json.dumps({"http_status_code": 400, "reason": 'Missing PlaylistTitle'})
+        return json.dumps({"http_status_code": 400, "reason": 'Missing playlist'})
     table_name = content['objtype'].capitalize()+"-ZZ-REG-ID"
     payload = {
         "music_id": content['uuid'],
@@ -293,7 +294,8 @@ def deletesong():
     headers = request.headers  # noqa: F841
     # check header here
     objtype = urllib.parse.unquote_plus(request.args.get('objtype'))
-    PlaylistTitle = urllib.parse.unquote_plus(request.args.get('PlaylistTitle'))
+    PlaylistTitle = urllib.parse.unquote_plus(
+        request.args.get('PlaylistTitle'))
     music_id = urllib.parse.unquote_plus(request.args.get('music_id'))
     table_name = objtype.capitalize()+"-ZZ-REG-ID"
     table = dynamodb.Table(table_name)
