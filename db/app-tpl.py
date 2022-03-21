@@ -254,7 +254,9 @@ def loadplaylist():
     if 'uuid' not in content:
         return json.dumps({"http_status_code": 400, "reason": 'Missing uuid'})
     if 'PlaylistTitle' not in content:
-        return json.dumps({"http_status_code": 400, "reason": 'Missing playlist'})
+        return json.dumps({
+            "http_status_code": 400,
+            "reason": 'Missing playlist'})
     table_name = content['objtype'].capitalize()+"-ZZ-REG-ID"
     payload = {
         "music_id": content['uuid'],
