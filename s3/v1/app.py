@@ -32,14 +32,14 @@ ucode = unique_code.exercise_hash(os.getenv('EXER'))
 app = Flask(__name__)
 
 metrics = PrometheusMetrics(app)
-metrics.info('app_info', 'Music process')
+metrics.info('app_info', 'Playlist process')
 
 db = {
     "name": "http://cmpt756db:30002/api/v1/datastore",
     "endpoint": [
-        "read",
-        "write",
-        "delete"
+        "readplaylist",
+        "writeplaylist",
+        "deletesong"
     ]
 }
 bp = Blueprint('app', __name__)
@@ -57,32 +57,34 @@ def readiness():
     return Response("", status=200, mimetype="application/json")
 
 
-@bp.route('/', methods=['GET'])
-def list_all():
-    headers = request.headers
-    # check header here
-    if 'Authorization' not in headers:
-        return Response(json.dumps({"error": "missing auth"}),
-                        status=401,
-                        mimetype='application/json')
-    # list all songs here
-    return {}
+# @bp.route('/', methods=['GET'])
+# def list_all():
+#     headers = request.headers
+#     # check header here
+#     if 'Authorization' not in headers:
+#         return Response(json.dumps({"error": "missing auth"}),
+#                         status=401,
+#                         mimetype='application/json')
+#     # list all songs here
+#     return {}
 
-@bp.route('/<playlist_id>', methods=['GET'])
-def get_song(playlist_id):
+
+@bp.route('/<playlist_title>', methods=['GET'])
+def read_playlist(playlist_title):
     headers = request.headers
     # check header here
     if 'Authorization' not in headers:
         return Response(json.dumps({"error": "missing auth"}),
                         status=401,
                         mimetype='application/json')
-    payload = {"objtype": "playlist", "objkey": playlist_id}
+    payload = {"objtype": "playlist", "objkey": playlist_title}
     url = db['name'] + '/' + db['endpoint'][0]
     response = requests.get(
         url,
         params=payload,
         headers={'Authorization': headers['Authorization']})
     return (response.json())
+
 
 @bp.route('/', methods=['POST'])
 def add_song():
@@ -96,15 +98,32 @@ def add_song():
         content = request.get_json()
         Artist = content['Artist']
         SongTitle = content['SongTitle']
+        PlaylistTitle = content['PlaylistTitle']
     except Exception:
         return json.dumps({"message": "error reading arguments"})
     url = db['name'] + '/' + db['endpoint'][1]
     response = requests.post(
         url,
-        json={"objtype": "playlist",  "Artist": Artist, "SongTitle": SongTitle},
+        json={"objtype": "playlist",
+              "Artist": Artist,
+              "SongTitle": SongTitle,
+              "PlaylistTitle": PlaylistTitle},
         headers={'Authorization': headers['Authorization']})
     return (response.json())
-        
+
+# def delete_song(music_id):
+#     headers = request.headers
+#     # check header here
+#     if 'Authorization' not in headers:
+#         return Response(json.dumps({"error": "missing auth"}),
+#                         status=401,
+#                         mimetype='application/json')
+#     url = db['name'] + '/' + db['endpoint'][2]
+#     response = requests.delete(
+#         url,
+#         params={"objtype": "music", "objkey": music_id},
+#         headers={'Authorization': headers['Authorization']})
+#     return (response.json())
 
 # @bp.route('/test', methods=['GET'])
 # def test():

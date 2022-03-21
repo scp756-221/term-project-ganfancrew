@@ -105,6 +105,19 @@ def read():
     return response
 
 
+@bp.route('/readplaylist', methods=['GET'])
+def readplaylist():
+    headers = request.headers  # noqa: F841
+    # check header here
+    objtype = urllib.parse.unquote_plus(request.args.get('objtype'))
+    objkey = urllib.parse.unquote_plus(request.args.get('objkey'))
+    table_name = objtype.capitalize()+"-ZZ-REG-ID"
+    table = dynamodb.Table(table_name)
+    response = table.query(Select='ALL_ATTRIBUTES',
+                           KeyConditionExpression=Key('PlaylistTitle').eq(objkey))
+    return response
+
+
 @bp.route('/write', methods=['POST'])
 def write():
     headers = request.headers  # noqa: F841
@@ -124,6 +137,29 @@ def write():
         returnval = {"message": "fail"}
     return json.dumps(
         ({table_id: payload[table_id]}, returnval)['returnval' in globals()])
+
+
+@bp.route('/writeplaylist', methods=['POST'])
+def writeplaylist():
+    headers = request.headers  # noqa: F841
+    # check header here
+    content = request.get_json()
+    table_name = content['objtype'].capitalize()+"-ZZ-REG-ID"
+    payload = {"music_id": str(uuid.uuid4())}
+    del content['objtype']
+    for k in content.keys():
+        payload[k] = content[k]
+    table = dynamodb.Table(table_name)
+    response = table.put_item(Item=payload)
+    returnval = ''
+    if response['ResponseMetadata']['HTTPStatusCode'] != 200:
+        returnval = {"message": "fail"}
+    return json.dumps(
+        ({
+            "music_id": payload["music_id"],
+            "PlaylistTitle": payload['PlaylistTitle']
+        }, returnval)['returnval' in globals()]
+    )
 
 
 def decode_auth_token(token):
@@ -188,6 +224,57 @@ def load():
     return json.dumps({table_id: payload[table_id]})
 
 
+@bp.route('/loadplaylist', methods=['POST'])
+def loadplaylist():
+    '''
+    Load a value into the database
+
+    This differs from write() in the following ways:
+    1. The caller must specify the UUID in `content`. http_status_code
+       400 is returned if this condition is not met.
+    2. The caller must include an "Authorization" header accepted
+       by load_auth(). A 401 status is returned for authorization failure.
+    3. If the database returns a non-200 status code, this routine
+       responds with an {http_status_code: status} object.
+
+    This routine potentially could share a common subroutine with
+    write() but the HTTP error processing in write() seems wrong
+    so this routine has its own code.
+    '''
+    headers = request.headers
+    if not load_auth(headers):
+        return Response(
+            json.dumps({"http_status_code": 401,
+                        "reason": "Invalid authorization for /loadplaylist"}),
+            status=401,
+            mimetype='application/json')
+
+    content = request.get_json()
+    if 'uuid' not in content:
+        return json.dumps({"http_status_code": 400, "reason": 'Missing uuid'})
+    if 'PlaylistTitle' not in content:
+        return json.dumps({"http_status_code": 400, "reason": 'Missing PlaylistTitle'})
+    table_name = content['objtype'].capitalize()+"-ZZ-REG-ID"
+    payload = {
+        "music_id": content['uuid'],
+        "PlaylistTitle": content['PlaylistTitle']
+    }
+    del content['objtype']
+    del content['uuid']
+    del content['PlaylistTitle']
+    for k in content.keys():
+        payload[k] = content[k]
+    table = dynamodb.Table(table_name)
+    response = table.put_item(Item=payload)
+    status = response['ResponseMetadata']['HTTPStatusCode']
+    if status != 200:
+        return json.dumps({"http_status_code": status})
+    return json.dumps({
+        "music_id": payload['music_id'],
+        "PlaylistTitle": payload['PlaylistTitle']
+    })
+
+
 @bp.route('/delete', methods=['DELETE'])
 def delete():
     headers = request.headers  # noqa: F841
@@ -198,6 +285,20 @@ def delete():
     table_id = objtype + "_id"
     table = dynamodb.Table(table_name)
     response = table.delete_item(Key={table_id: objkey})
+    return response
+
+
+@bp.route('/deletesong', methods=['DELETE'])
+def deletesong():
+    headers = request.headers  # noqa: F841
+    # check header here
+    objtype = urllib.parse.unquote_plus(request.args.get('objtype'))
+    PlaylistTitle = urllib.parse.unquote_plus(request.args.get('PlaylistTitle'))
+    music_id = urllib.parse.unquote_plus(request.args.get('music_id'))
+    table_name = objtype.capitalize()+"-ZZ-REG-ID"
+    table = dynamodb.Table(table_name)
+    response = table.delete_item(
+        Key={'PlaylistTitle': PlaylistTitle, 'music_id': music_id})
     return response
 
 

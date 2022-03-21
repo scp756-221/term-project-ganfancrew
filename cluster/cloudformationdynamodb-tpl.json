@@ -29,14 +29,22 @@
           "TableName": "Playlist-ZZ-REG-ID",
           "AttributeDefinitions": [
             {
-              "AttributeName": "playlist_id",
+              "AttributeName": "PlaylistTitle",
+              "AttributeType": "S"
+            },
+            {
+              "AttributeName": "music_id",
               "AttributeType": "S"
             }
           ],
           "KeySchema": [
             {
-              "AttributeName": "playlist_id",
+              "AttributeName": "PlaylistTitle",
               "KeyType": "HASH"
+            },
+            {
+              "AttributeName": "music_id",
+              "KeyType": "RANGE"
             }
           ],
           "ProvisionedThroughput": {

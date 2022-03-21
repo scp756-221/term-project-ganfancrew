@@ -60,28 +60,19 @@ Enter 'help' for command list.
 'Tab' character autocompletes commands.
 """
 
-    def do_read(self, arg):
+    def do_read_playlist(self, arg):
         """
-        Read a single song or list all songs.
+        list all songs in a playlist.
 
         Parameters
         ----------
-        song:  playlist_id (optional)
-            The playlist_id of the song to read. If not specified,
-            all songs are listed.
+        playlist: string
+            The playlist_title of the song to read
 
         Examples
         --------
-        read 6ecfafd0-8a35-4af6-a9e2-cbd79b3abeea
-            Return "The Last Great American Dynasty".
-        read
-            Return all songs (if the server supports this).
+        read_playlist MyDefaultPlaylist
 
-        Notes
-        -----
-        Some versions of the server do not support listing
-        all songs and will instead return an empty list if
-        no parameter is provided.
         """
         url = get_url(self.name, self.port)
         r = requests.get(
@@ -96,29 +87,37 @@ Enter 'help' for command list.
             return
         print("{} items returned".format(items['Count']))
         for i in items['Items']:
-            print("{} {:20.20s} {}".format(
-                i['playlist_id'],
+            print("{} {} {:20.20s} {}".format(
+                i['PlaylistTitle'],
+                i['music_id'],
                 i['Artist'],
                 i['SongTitle']))
-
-       
+   
     def do_add_song(self, arg):
         """
-        Add a song to the database.
+        Add a song to a playlist.
 
         Parameters
         ----------
         artist: string
-        title: string
+        song: string
+            The title of the song
+        playlist: string (optional)
+            The playlist_title of the playlist
+            The default playlist is "MyDefaultPlaylist"
 
-        Both parameters can be quoted by either single or double quotes.
+        The parameters can be quoted by either single or double quotes.
+        The playlist parameter should not contain any space.
 
         Examples
         --------
-        create 'Steely Dan'  "Everyone's Gone to the Movies"
+        add_song 'Stray Kids' "Charmer" "NewPlaylist"
             Quote the apostrophe with double-quotes.
 
-        create Chumbawamba Tubthumping
+        add_song 'Stray Kids' 'Christmas EveL'
+            Add to the default playlist.
+
+        add_song aespa Savage
             No quotes needed for single-word artist or title name.
         """
         url = get_url(self.name, self.port)
@@ -127,53 +126,49 @@ Enter 'help' for command list.
             'Artist': args[0],
             'SongTitle': args[1]
         }
+        if len(args) == 3:
+            payload['PlaylistTitle'] = args[2]
+        else:
+            payload['PlaylistTitle'] = "MyDefaultPlaylist"
         r = requests.post(
             url,
             json=payload,
             headers={'Authorization': DEFAULT_AUTH}
         )
-        print(r.json())
-    
-    # def do_create_playlist(self,arg):
-    #     url = get_url(self.name, self.port)
-    #     args = parse_quoted_strings(arg)
-    #     payload = {
-    #         'Artist': args[0],
-    #         'SongTitle': args[1]
-    #     }
-    #     r = requests.post(
-    #         url,
-    #         json=payload,
-    #         headers={'Authorization': DEFAULT_AUTH}
-    #     )
-    #     if r.status_code != 200:
-    #         print("Non-successful status code: {}, {}"
-    #                 .format(r.status_code, r.json()["error"]))
-    #     else:
-    #         print(r.json())
+        if r.status_code != 200:
+            print("Non-successful status code: {}, {}"
+                    .format(r.status_code, r.json()["error"]))
+        else:
+            print(r.json())
 
 
-    def do_delete(self, arg):
+    def do_delete_song(self, arg):
         """
         Delete a song.
 
         Parameters
         ----------
-        song: playlist_id
-            The playlist_id of the song to delete.
+        playlist: string
+            The playlist_title of the playlist.
+        music_id: the uuid of the song
+            The uuid of the song to delete.
 
         Examples
         --------
-        delete 6ecfafd0-8a35-4af6-a9e2-cbd79b3abeea
-            Delete "The Last Great American Dynasty".
+        delete MyPlaylist 5adbd1af-359a-4fa7-a4d8-ec281463afc9
+            Delete something.
         """
         url = get_url(self.name, self.port)
+        args = arg.strip().split()
         r = requests.delete(
-            url+arg.strip(),
+            url+args[0]+'/'+args[1],
             headers={'Authorization': DEFAULT_AUTH}
-            )
+        )
         if r.status_code != 200:
             print("Non-successful status code:", r.status_code)
+        else:
+            print(r.json())
+
 
     def do_quit(self, arg):
         """
