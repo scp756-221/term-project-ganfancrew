@@ -57,18 +57,6 @@ def readiness():
     return Response("", status=200, mimetype="application/json")
 
 
-# @bp.route('/', methods=['GET'])
-# def list_all():
-#     headers = request.headers
-#     # check header here
-#     if 'Authorization' not in headers:
-#         return Response(json.dumps({"error": "missing auth"}),
-#                         status=401,
-#                         mimetype='application/json')
-#     # list all songs here
-#     return {}
-
-
 @bp.route('/<playlist_title>', methods=['GET'])
 def read_playlist(playlist_title):
     headers = request.headers
@@ -93,7 +81,7 @@ def add_song():
     if 'Authorization' not in headers:
         return Response(json.dumps({"error": "missing auth"}),
                         status=401,
-                        mimetype='application/json')  
+                        mimetype='application/json')
     try:
         content = request.get_json()
         Artist = content['Artist']
@@ -111,19 +99,27 @@ def add_song():
         headers={'Authorization': headers['Authorization']})
     return (response.json())
 
-# def delete_song(music_id):
-#     headers = request.headers
-#     # check header here
-#     if 'Authorization' not in headers:
-#         return Response(json.dumps({"error": "missing auth"}),
-#                         status=401,
-#                         mimetype='application/json')
-#     url = db['name'] + '/' + db['endpoint'][2]
-#     response = requests.delete(
-#         url,
-#         params={"objtype": "music", "objkey": music_id},
-#         headers={'Authorization': headers['Authorization']})
-#     return (response.json())
+
+@bp.route('/<playlist_title>/<music_id>', methods=['DELETE'])
+def delete_song(playlist_title, music_id):
+    headers = request.headers
+    # check header here
+    if 'Authorization' not in headers:
+        return Response(json.dumps({"error": "missing auth"}),
+                        status=401,
+                        mimetype='application/json')
+    payload = {
+        "objtype": "playlist",
+        "PlaylistTitle": playlist_title,
+        "music_id": music_id
+    }
+    url = db['name'] + '/' + db['endpoint'][2]
+    response = requests.delete(
+        url,
+        params=payload,
+        headers={'Authorization': headers['Authorization']})
+    return (response.json())
+
 
 # @bp.route('/test', methods=['GET'])
 # def test():

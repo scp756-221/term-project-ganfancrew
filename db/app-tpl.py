@@ -296,9 +296,9 @@ def deletesong():
     headers = request.headers  # noqa: F841
     # check header here
     objtype = urllib.parse.unquote_plus(request.args.get('objtype'))
+    music_id = urllib.parse.unquote_plus(request.args.get('music_id'))
     PlaylistTitle = urllib.parse.unquote_plus(
         request.args.get('PlaylistTitle'))
-    music_id = urllib.parse.unquote_plus(request.args.get('music_id'))
     table_name = objtype.capitalize()+"-ZZ-REG-ID"
     table = dynamodb.Table(table_name)
     response = table.delete_item(

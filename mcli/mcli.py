@@ -62,37 +62,45 @@ Enter 'help' for command list.
 
     def do_read_playlist(self, arg):
         """
-        list all songs in a playlist.
+        List all songs in a playlist.
 
         Parameters
         ----------
         playlist: string
-            The playlist_title of the song to read
+            The title of the playlist
 
         Examples
         --------
-        read_playlist MyDefaultPlaylist
-
+        read_playlist MyPlaylist
+            List all songs in the MyPlaylist playlist.
         """
         url = get_url(self.name, self.port)
+        playlist = arg.strip()
+        if playlist == '':
+            print("Wrong number of parameters")
+            return
         r = requests.get(
-            url+arg.strip(),
+            url+playlist,
             headers={'Authorization': DEFAULT_AUTH}
             )
         if r.status_code != 200:
             print("Non-successful status code:", r.status_code)
         items = r.json()
         if 'Count' not in items:
-            print("0 items returned")
+            print("{} does not exist".format(playlist))
             return
-        print("{} items returned".format(items['Count']))
-        for i in items['Items']:
-            print("{} {} {:20.20s} {}".format(
-                i['PlaylistTitle'],
-                i['music_id'],
-                i['Artist'],
-                i['SongTitle']))
-   
+        num_song = items['Count']
+        if num_song == 0:
+            print("{} does not exist".format(playlist))
+        else:
+            print("{} song(s) in {}".format(num_song, playlist))
+            for i in items['Items']:
+                print("{} {} {:20.20s} {}".format(
+                    i['PlaylistTitle'],
+                    i['music_id'],
+                    i['Artist'],
+                    i['SongTitle']))
+
     def do_add_song(self, arg):
         """
         Add a song to a playlist.
@@ -103,8 +111,8 @@ Enter 'help' for command list.
         song: string
             The title of the song
         playlist: string (optional)
-            The playlist_title of the playlist
-            The default playlist is "MyDefaultPlaylist"
+            The title of the playlist
+            The default playlist is "MyDefaultPlaylist".
 
         The parameters can be quoted by either single or double quotes.
         The playlist parameter should not contain any space.
@@ -112,16 +120,20 @@ Enter 'help' for command list.
         Examples
         --------
         add_song 'Stray Kids' "Charmer" "NewPlaylist"
+            Add a song to the NewPlaylist playlist.
             Quote the apostrophe with double-quotes.
 
         add_song 'Stray Kids' 'Christmas EveL'
-            Add to the default playlist.
+            Add a song to the default playlist.
 
         add_song aespa Savage
             No quotes needed for single-word artist or title name.
         """
         url = get_url(self.name, self.port)
         args = parse_quoted_strings(arg)
+        if len(args) < 2:
+            print("Wrong number of parameters")
+            return
         payload = {
             'Artist': args[0],
             'SongTitle': args[1]
@@ -137,29 +149,31 @@ Enter 'help' for command list.
         )
         if r.status_code != 200:
             print("Non-successful status code: {}, {}"
-                    .format(r.status_code, r.json()["error"]))
+                  .format(r.status_code, r.json()["error"]))
         else:
             print(r.json())
 
-
     def do_delete_song(self, arg):
         """
-        Delete a song.
+        Delete a song in a playlist.
 
         Parameters
         ----------
         playlist: string
-            The playlist_title of the playlist.
-        music_id: the uuid of the song
+            The title of the playlist.
+        music_id: string
             The uuid of the song to delete.
 
         Examples
         --------
-        delete MyPlaylist 5adbd1af-359a-4fa7-a4d8-ec281463afc9
-            Delete something.
+        delete_song MyPlaylist 92dc6269-2d0f-4ac9-bf0b-ef5d9dbbc0d8
+            Delete the song in the MyPlaylist playlist.
         """
         url = get_url(self.name, self.port)
         args = arg.strip().split()
+        if len(args) != 2:
+            print("Wrong number of parameters")
+            return
         r = requests.delete(
             url+args[0]+'/'+args[1],
             headers={'Authorization': DEFAULT_AUTH}
@@ -167,8 +181,52 @@ Enter 'help' for command list.
         if r.status_code != 200:
             print("Non-successful status code:", r.status_code)
         else:
-            print(r.json())
+            print('Delete song successfully')
 
+    def do_delete_playlist(self, arg):
+        """
+        Delete a playlist.
+
+        Parameters
+        ----------
+        playlist: string
+            The title of the playlist
+
+        Examples
+        --------
+        delete_playlist MyPlaylist
+            Delete the MyPlaylist playlist.
+        """
+        url = get_url(self.name, self.port)
+        playlist = arg.strip()
+        if playlist == '':
+            print("Wrong number of parameters")
+            return
+        r = requests.get(
+            url+playlist,
+            headers={'Authorization': DEFAULT_AUTH}
+        )
+        if r.status_code != 200:
+            print("Non-successful status code:", r.status_code)
+        items = r.json()
+        if 'Count' not in items:
+            print("{} does not exist".format(playlist))
+            return
+        num_song = items['Count']
+        if num_song == 0:
+            print("{} does not exist".format(playlist))
+        else:
+            print("{} song(s) in {}".format(num_song, playlist))
+            for i in items['Items']:
+                del_r = requests.delete(
+                    url+playlist+'/'+i['music_id'],
+                    headers={'Authorization': DEFAULT_AUTH}
+                )
+                if del_r.status_code != 200:
+                    print("Non-successful status code:", del_r.status_code)
+                    return
+                else:
+                    print('Delete song successfully')
 
     def do_quit(self, arg):
         """
@@ -187,7 +245,6 @@ Enter 'help' for command list.
     #         )
     #     if r.status_code != 200:
     #         print("Non-successful status code:", r.status_code)
-
 
     def do_shutdown(self, arg):
         """
