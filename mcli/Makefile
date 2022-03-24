@@ -2,11 +2,11 @@
 
 VER=v0.8
 
-SERVER=`docker inspect S2 --format '{{.NetworkSettings.IPAddress}}'`
+SERVER=`docker inspect S3 --format '{{.NetworkSettings.IPAddress}}'`
 PORT=30001
 
-build-mcli:
-	docker image build -f Dockerfile -t mcli:$(VER) .
+build-pcli:
+	docker image build -f Dockerfile -t pcli:$(VER) .
 
-run-mcli:
-	docker container run -it --rm --name mcli mcli:$(VER) python3 mcli.py $(SERVER) $(PORT)
+run-pcli:
+	docker container run -it --rm --name pcli pcli:$(VER) python3 pcli.py $(SERVER) $(PORT)
