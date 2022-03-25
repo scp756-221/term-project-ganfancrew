@@ -17,7 +17,7 @@ DEFAULT_AUTH = 'Bearer A'
 
 def parse_args():
     argp = argparse.ArgumentParser(
-        'mcli',
+        'pcli',
         description='Command-line query interface to playlist service'
         )
     argp.add_argument(
@@ -48,7 +48,7 @@ def parse_quoted_strings(arg):
     return [''.join(a) for a in args]
 
 
-class Mcli(cmd.Cmd):
+class Pcli(cmd.Cmd):
     def __init__(self, args):
         self.name = args.name
         self.port = args.port
@@ -59,6 +59,30 @@ Command-line interface to playlist service.
 Enter 'help' for command list.
 'Tab' character autocompletes commands.
 """
+
+    def do_playlists(self, arg):
+        """
+        """
+        url = get_url(self.name, self.port)
+        r = requests.get(
+            url,
+            headers={'Authorization': DEFAULT_AUTH}
+            )
+        if r.status_code != 200:
+            print("Non-successful status code:", r.status_code)
+        items = r.json()
+        if 'Count' not in items:
+            print("No playlists")
+            return
+        if items['Count'] == 0:
+            print("No playlists")
+        else:
+            for i in items['Items']:
+                print("{} {} {:20.20s} {}".format(
+                    i['PlaylistTitle'],
+                    i['music_id'],
+                    i['Artist'],
+                    i['SongTitle']))
 
     def do_read_playlist(self, arg):
         """
@@ -261,4 +285,4 @@ Enter 'help' for command list.
 
 if __name__ == '__main__':
     args = parse_args()
-    Mcli(args).cmdloop()
+    Pcli(args).cmdloop()

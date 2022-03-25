@@ -105,6 +105,17 @@ def read():
     return response
 
 
+@bp.route('/playlists', methods=['GET'])
+def all_playlists():
+    headers = request.headers  # noqa: F841
+    # check header here
+    objtype = "playlist"
+    table_name = objtype.capitalize()+"-ZZ-REG-ID"
+    table = dynamodb.Table(table_name)
+    response = table.scan()
+    return response
+
+
 @bp.route('/readplaylist', methods=['GET'])
 def readplaylist():
     headers = request.headers  # noqa: F841

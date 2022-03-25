@@ -39,7 +39,8 @@ db = {
     "endpoint": [
         "readplaylist",
         "writeplaylist",
-        "deletesong"
+        "deletesong",
+        "playlists"
     ]
 }
 bp = Blueprint('app', __name__)
@@ -55,6 +56,21 @@ def health():
 @metrics.do_not_track()
 def readiness():
     return Response("", status=200, mimetype="application/json")
+
+
+@bp.route('/', methods=['GET'])
+def all():
+    headers = request.headers
+    # check header here
+    if 'Authorization' not in headers:
+        return Response(json.dumps({"error": "missing auth"}),
+                        status=401,
+                        mimetype='application/json')
+    url = db['name'] + '/' + db['endpoint'][3]
+    response = requests.get(
+        url,
+        headers={'Authorization': headers['Authorization']})
+    return (response.json())
 
 
 @bp.route('/<playlist_title>', methods=['GET'])
