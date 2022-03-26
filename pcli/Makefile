@@ -3,7 +3,7 @@
 VER=v0.8
 
 SERVER=`docker inspect S3 --format '{{.NetworkSettings.IPAddress}}'`
-PORT=30001
+PORT=30003
 
 build-pcli:
 	docker image build -f Dockerfile -t pcli:$(VER) .
