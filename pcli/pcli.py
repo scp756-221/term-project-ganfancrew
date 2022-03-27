@@ -53,7 +53,7 @@ class Pcli(cmd.Cmd):
         self.name = args.name
         self.port = args.port
         cmd.Cmd.__init__(self)
-        self.prompt = 'pql: '
+        self.prompt = 'mql: '
         self.intro = """
 Command-line interface to playlist service.
 Enter 'help' for command list.
