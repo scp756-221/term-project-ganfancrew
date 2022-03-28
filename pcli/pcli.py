@@ -62,6 +62,12 @@ Enter 'help' for command list.
 
     def do_playlists(self, arg):
         """
+        Show all playlists.
+
+        Examples
+        --------
+        playlists
+            Show all titles of existing playlists.
         """
         url = get_url(self.name, self.port)
         r = requests.get(
@@ -77,12 +83,8 @@ Enter 'help' for command list.
         if items['Count'] == 0:
             print("No playlists")
         else:
-            for i in items['Items']:
-                print("{} {} {:20.20s} {}".format(
-                    i['PlaylistTitle'],
-                    i['music_id'],
-                    i['Artist'],
-                    i['SongTitle']))
+            playlist = set(i['PlaylistTitle'] for i in items['Items'])
+            print(playlist)
 
     def do_read_playlist(self, arg):
         """
