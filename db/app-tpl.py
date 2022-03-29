@@ -112,7 +112,7 @@ def all_playlists():
     objtype = "playlist"
     table_name = objtype.capitalize()+"-ZZ-REG-ID"
     table = dynamodb.Table(table_name)
-    response = table.scan()
+    response = table.scan(ProjectionExpression='PlaylistTitle')
     return response
 
 
