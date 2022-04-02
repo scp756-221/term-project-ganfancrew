@@ -5,7 +5,6 @@ Sample application---music service.
 
 # Standard library modules
 import logging
-import os
 import sys
 
 # Installed packages
@@ -20,12 +19,6 @@ import requests
 
 import simplejson as json
 
-# Local modules
-import unique_code
-
-# The unique exercise code
-# The EXER environment variable has a value specific to this exercise
-ucode = unique_code.exercise_hash(os.getenv('EXER'))
 
 # The application
 
@@ -137,15 +130,6 @@ def delete_song(playlist_title, music_id):
     return (response.json())
 
 
-# @bp.route('/test', methods=['GET'])
-# def test():
-#     # This value is for user scp756-221
-#     if ('a7a2998d24e65de2f79f5696e3ab088dea3821111756d9fb6e58c8eaaff74644' !=
-#             ucode):
-#         raise Exception("Test failed")
-#     return {}
-
-
 @bp.route('/shutdown', methods=['GET'])
 def shutdown():
     # From https://stackoverflow.com/questions/15562446/how-to-stop-flask-application-without-using-ctrl-c # noqa: E501
@@ -163,6 +147,5 @@ if __name__ == '__main__':
         logging.error("missing port arg 1")
         sys.exit(-1)
 
-    # app.logger.error("Unique code: {}".format(ucode))
     p = int(sys.argv[1])
     app.run(host='0.0.0.0', port=p, threaded=True)
