@@ -63,25 +63,36 @@ $ make -f k8s-tpl.mak templates
 ~~~
 
 2. Check tables in AWS DynamoDB
- - aws dynamodb list-tables
+~~~
+$ aws dynamodb list-tables
+~~~
 If the db stack exists, but the resulting output not include tables User and Music and Playlist, delete the stack first:
- - aws cloudformation delete-stack --stack-name db-ZZ-REG-ID
+~~~
+$ aws cloudformation delete-stack --stack-name db-ZZ-REG-ID
+~~~
 
 3. Start cluster
- - make -f eks.mak start
+~~~
+$ make -f eks.mak start
+~~~
 
 4. Deploy all services
- - make -f k8s.mak provision
-
+~~~
+$ make -f k8s.mak provision
+~~~
 
 ### 4. Run Client for S3
 1. Get external IP
- - kubectl -n istio-system get service istio-ingressgateway | cut -c -140
+~~~
+$ kubectl -n istio-system get service istio-ingressgateway | cut -c -140
+~~~
 
 2. Run pcli
-cd pcli
- - make PORT=80 SERVER=EXTERNAL-IP build-pcli
- - make PORT=80 SERVER=EXTERNAL-IP run-pcli
+~~~
+$ cd pcli
+$ make PORT=80 SERVER=EXTERNAL-IP build-pcli
+$ make PORT=80 SERVER=EXTERNAL-IP run-pcli
+~~~
 
 3. Monitor pods
  - k9s
