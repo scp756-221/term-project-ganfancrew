@@ -50,3 +50,4 @@ spec:
         host: cmpt756s3
         subset: v1
       weight: 100
+    
