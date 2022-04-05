@@ -52,6 +52,96 @@ The resulting output should include tables `User` and `Music`.
 ----
 
 
+### 3. Ensure microservices is running
+
+1. Run container
+ - tools/shell.sh
+ - make -f k8s-tpl.mak templates
+
+2. Check tables in AWS DynamoDB
+ - aws dynamodb list-tables
+If the db stack exists, but the resulting output not include tables User and Music and Playlist, delete the stack first:
+ - aws cloudformation delete-stack --stack-name db-ZZ-REG-ID
+
+3. Start cluster
+ - make -f eks.mak start
+
+4. Deploy all services
+ - make -f k8s.mak provision
+
+
+### 4. Run Client for S3
+1. Get external IP
+ - kubectl -n istio-system get service istio-ingressgateway | cut -c -140
+
+2. Run pcli
+cd pcli
+ - make PORT=80 SERVER=EXTERNAL-IP build-pcli
+ - make PORT=80 SERVER=EXTERNAL-IP run-pcli
+
+3. Monitor pods
+ - k9s
+
+### 5. Grafana
+1. Print the Grafana URL
+ - make -f k8s.mak grafana-url
+
+2. Sign on to Grafana dashboard
+User: admin
+Password: prom-operator
+Select “Browse” from the menu. This will bring up a list of dashboards. Click on c756 transactions
+
+3. Simulation
+ - exit
+(start a new terminal window and make sure you're not in tools/shell.sh)
+Send initial loads to the system
+ - ./gatling-10-music.sh
+ - ./gatling-10-playlist.sh
+ - ./gatling-10-user.sh
+Send medium loads to the system 
+ - ./gatling-100-music.sh
+ - ./gatling-100-playlist.sh
+ - ./gatling-100-user.sh
+Send heavy loads to the system 
+ - ./gatling-260-music.sh
+ - ./gatling-260-playlist.sh
+ - ./gatling-260-user.sh
+
+4. Stop gatling
+ - tools/kill-gatling.sh
+
+5. Close cluster
+ - make -f eks.mak stop
+
+
+### 6. Kiali
+1. Print the Grafana URL & Kiali URL
+ - make -f k8s.mak grafana-url
+ - make -f k8s.mak kiali-url
+
+2. Start gatling 
+ - ./gatling-10-music.sh
+ - ./gatling-10-playlist.sh
+ - ./gatling-10-user.sh
+(add more if neccessary)
+
+3. Kiali graph
+Namespaces: c756ns
+Graph type: Versioned app graph
+Display interval: Last 1m
+Refresh interval: Every 30s
+Display:
+Show Edge Labels: Traffic Rate
+Show: Compressed Hide, Operation Nodes, Service Nodes, Traffic Animation
+Show Badges: Virtual Services
+
+4. Stop gatling
+ - tools/kill-gatling.sh
+ 
+5. Close cluster
+ - make -f eks.mak stop
+
+
 ### Reference
 
 This is the tree of this repo. 
@@ -183,3 +273,5 @@ Assorted scripts that you can pick and choose from:
 ```
 └── ./tools
 ```
+
+
