@@ -90,16 +90,24 @@ $ kubectl -n istio-system get service istio-ingressgateway | cut -c -140
 2. Run pcli
 ~~~
 $ cd pcli
+~~~
+~~~
 $ make PORT=80 SERVER=EXTERNAL-IP build-pcli
+~~~
+~~~
 $ make PORT=80 SERVER=EXTERNAL-IP run-pcli
 ~~~
 
 3. Monitor pods
- - k9s
+~~~
+$ k9s
+~~~
 
 ### 5. Grafana
 1. Print the Grafana URL
- - make -f k8s.mak grafana-url
+~~~
+$ make -f k8s.mak grafana-url
+~~~
 
 2. Sign on to Grafana dashboard
 User: admin
@@ -107,37 +115,68 @@ Password: prom-operator
 Select “Browse” from the menu. This will bring up a list of dashboards. Click on c756 transactions
 
 3. Simulation
- - exit
-(start a new terminal window and make sure you're not in tools/shell.sh)
+(Make sure to start a new terminal window and you're not in tools/shell.sh)
 Send initial loads to the system
- - ./gatling-10-music.sh
- - ./gatling-10-playlist.sh
- - ./gatling-10-user.sh
-Send medium loads to the system 
- - ./gatling-100-music.sh
- - ./gatling-100-playlist.sh
- - ./gatling-100-user.sh
+~~~
+$ ./gatling-10-music.sh
+~~~
+~~~
+$ ./gatling-10-playlist.sh
+~~~
+~~~
+$ ./gatling-10-user.sh
+~~~
+Send medium loads to the system
+~~~
+$ ./gatling-100-music.sh
+~~~
+~~~
+$ ./gatling-100-playlist.sh
+~~~
+~~~
+$ ./gatling-100-user.sh
+~~~
 Send heavy loads to the system 
- - ./gatling-260-music.sh
- - ./gatling-260-playlist.sh
- - ./gatling-260-user.sh
+~~~
+$ ./gatling-260-music.sh
+~~~
+~~~
+$ ./gatling-260-playlist.sh
+~~~
+~~~
+$ ./gatling-260-user.sh
+~~~
 
 4. Stop gatling
- - tools/kill-gatling.sh
+~~~
+$ tools/kill-gatling.sh
+~~~
 
 5. Close cluster
- - make -f eks.mak stop
+~~~
+$ make -f eks.mak stop
+~~~
 
 
 ### 6. Kiali
 1. Print the Grafana URL & Kiali URL
- - make -f k8s.mak grafana-url
- - make -f k8s.mak kiali-url
+~~~
+$ make -f k8s.mak grafana-url
+~~~
+~~~
+$ make -f k8s.mak kiali-url
+~~~
 
 2. Start gatling 
- - ./gatling-10-music.sh
- - ./gatling-10-playlist.sh
- - ./gatling-10-user.sh
+~~~
+$ ./gatling-10-music.sh
+~~~
+~~~
+$ ./gatling-10-playlist.sh
+~~~
+~~~
+$ ./gatling-10-user.sh
+~~~
 (add more if neccessary)
 
 3. Kiali graph
@@ -151,11 +190,13 @@ Show: Compressed Hide, Operation Nodes, Service Nodes, Traffic Animation
 Show Badges: Virtual Services
 
 4. Stop gatling
- - tools/kill-gatling.sh
-
+~~~
+$ tools/kill-gatling.sh
+~~~
 5. Close cluster
- - make -f eks.mak stop
-
+~~~
+$ make -f eks.mak stop
+~~~
 
 ### Reference
 
