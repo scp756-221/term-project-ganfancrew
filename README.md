@@ -55,8 +55,12 @@ The resulting output should include tables `User` and `Music`.
 ### 3. Ensure microservices is running
 
 1. Run container
- - tools/shell.sh
- - make -f k8s-tpl.mak templates
+~~~
+$ tools/shell.sh
+~~~
+~~~
+$ make -f k8s-tpl.mak templates
+~~~
 
 2. Check tables in AWS DynamoDB
  - aws dynamodb list-tables
@@ -137,7 +141,7 @@ Show Badges: Virtual Services
 
 4. Stop gatling
  - tools/kill-gatling.sh
- 
+
 5. Close cluster
  - make -f eks.mak stop
 
