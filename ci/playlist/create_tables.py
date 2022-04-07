@@ -18,9 +18,8 @@ import boto3
 
 
 # Function definitions
-def create_tables(url, region, access_key_id, secret_access_key,
-                  music, user, playlist):
-    """ Create the music and user tables in DynamoDB.
+def create_tables(url, region, access_key_id, secret_access_key, ptitle, user):
+    """ Create the playlist and user tables in DynamoDB.
 
     Parameters
     ----------
@@ -40,8 +39,8 @@ def create_tables(url, region, access_key_id, secret_access_key,
         The secret access key value associated with the key ID. Local
         DynamodDB copies will accept any value, while the actual AWS
         service requires the secret key associated with the key ID.
-    music: string
-        Name of the music table.
+    ptitle: string
+        Name of the playlist table.
     user: string
         Name of the user table.
     """
@@ -57,11 +56,16 @@ def create_tables(url, region, access_key_id, secret_access_key,
 
     These create_table() calls are asynchronous and so will run in parallel.
     """
-    mt = dynamodb.create_table(
-        TableName=music,
-        AttributeDefinitions=[{
-            "AttributeName": "music_id", "AttributeType": "S"}],
-        KeySchema=[{"AttributeName": "music_id", "KeyType": "HASH"}],
+    pt = dynamodb.create_table(
+        TableName=ptitle,
+        AttributeDefinitions=[
+            {"AttributeName": "PlaylistTitle", "AttributeType": "S"},
+            {"AttributeName": "music_id", "AttributeType": "S"}
+        ],
+        KeySchema=[
+            {"AttributeName": "PlaylistTitle", "KeyType": "HASH"},
+            {"AttributeName": "music_id", "KeyType": "RANGE"}
+        ],
         ProvisionedThroughput={
             "ReadCapacityUnits": 5, "WriteCapacityUnits": 5}
     )
@@ -73,20 +77,9 @@ def create_tables(url, region, access_key_id, secret_access_key,
         ProvisionedThroughput={
             "ReadCapacityUnits": 5, "WriteCapacityUnits": 5}
     )
-    pt = dynamodb.create_table(
-        TableName=playlist,
-        AttributeDefinitions=[
-            {"AttributeName": "PlaylistTitle", "AttributeType": "S"},
-            {"AttributeName": "music_id", "AttributeType": "S"}],
-        KeySchema=[{"AttributeName": "PlaylistTitle", "KeyType": "HASH"},
-                   {"AttributeName": "music_id", "KeyType": "RANGE"}],
-        ProvisionedThroughput={
-            "ReadCapacityUnits": 5, "WriteCapacityUnits": 5}
-    )
     """
     The order in which we wait for the tables is irrelevant.  We can only
     proceed after both exist.
     """
-    mt.wait_until_exists()
-    ut.wait_until_exists()
     pt.wait_until_exists()
+    ut.wait_until_exists()

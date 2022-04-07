@@ -1,12 +1,11 @@
-name: CI test of playlist 
+name: CI test of playlist
 
 on:
   push:
     paths:
       - db/*
       - s1/*
-      - s2/v1.1/*
-      - s3/v1/*
+      - s3/v1*
       - ci/playlist/*
       - .github/workflows/ci-system-playlist.yaml
 

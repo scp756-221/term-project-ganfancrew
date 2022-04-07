@@ -16,8 +16,14 @@ aws dynamodb create-table \
 aws dynamodb create-table \
   --endpoint-url http://0.0.0.0:8000 \
   --region us-west-2 \
+  --table-name Playlist-ZZ-REG-ID \
+  --attribute-definitions '[{"AttributeName": "PlaylistTitle", "AttributeType": "S"}, {"AttributeName": "music_id", "AttributeType": "S"}]' \
+  --key-schema '[{"AttributeName": "PlaylistTitle", "KeyType": "HASH"}, {"AttributeName": "music_id", "KeyType": "RANGE"}]' \
+  --provisioned-throughput '{"ReadCapacityUnits": 5, "WriteCapacityUnits": 5}'
+aws dynamodb create-table \
+  --endpoint-url http://0.0.0.0:8000 \
+  --region us-west-2 \
   --table-name User-ZZ-REG-ID \
   --attribute-definitions '[{ "AttributeName": "user_id", "AttributeType": "S" }]' \
   --key-schema '[{ "AttributeName": "user_id", "KeyType": "HASH" }]' \
   --provisioned-throughput '{"ReadCapacityUnits": 5, "WriteCapacityUnits": 5}'
-
