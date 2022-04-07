@@ -22,12 +22,15 @@ def pserv(request, playlist_url, auth):
 
 def test_playlist_full_cycle(pserv):
     song = ('Yamashita Tatsuto', 'Kanashimi no Jody')
-    p_title = 'NewPlaylist'
+    p_title = 'MyDefaultPlaylist'
 
-    trc = pserv.add_song(song[0], song[1], p_title)
+    trc = pserv.all()
     assert trc == 200
 
-    # trc = pserv.read_playlist(p_title)
-    # assert trc == 200
+    trc, m_id = pserv.add_song(song[0], song[1], p_title)
+    assert trc == 200
 
-    # pserv.delete_song(p_title, m_id)
+    trc = pserv.read_playlist(p_title)
+    assert trc == 200
+
+    pserv.delete_song(p_title, m_id)
