@@ -24,7 +24,10 @@ def test_playlist_full_cycle(pserv):
     song = ('Yamashita Tatsuto', 'Kanashimi no Jody')
     p_title = 'NewPlaylist'
 
-    trc, m_id = pserv.add_song(song[0], song[1], p_title)
+    trc = pserv.add_song(song[0], song[1], p_title)
     assert trc == 200
 
-    pserv.delete_song(p_title, m_id)
+    # trc = pserv.read_playlist(p_title)
+    # assert trc == 200
+
+    # pserv.delete_song(p_title, m_id)

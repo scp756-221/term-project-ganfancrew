@@ -185,7 +185,8 @@ def setup(args):
         args.access_key_id,
         args.secret_access_key,
         'Music-' + args.table_suffix,
-        'User-' + args.table_suffix
+        'User-' + args.table_suffix,
+        'Playlist-' + args.table_suffix
     )
 
 
