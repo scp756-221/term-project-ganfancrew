@@ -6,11 +6,11 @@ This directory contains the continuous integration (CI) framework. It includes t
 
 The automatic CI is defined by the following GitHub Action files:
 
-* `../.github/workflows/ci-system-v*.yaml`: GitHub Action Specification of systemic CI using a local DynamoDB for a given version.
+* `../.github/workflows/ci-system-*.yaml`: GitHub Action Specification of systemic CI using a local DynamoDB for a given version.
 
 The top level of the CI is run by:
 
-* `runci.sh`: The script calling `docker-compose` to spin up the instances of the S1, S2, DB, and test services, together with a local copy of DynamodB. It takes an optional argument, specifying the subdirectory defining the test to run.  The default value of this argument is `v1`.  **If you want to run a test locally, you probably want to use `runci-local.sh`, described below.**
+* `runci.sh`: The script calling `docker-compose` to spin up the instances of the S1, S2, S3, DB, and test services, together with a local copy of DynamodB. It takes an optional argument, specifying the subdirectory defining the test to run.  The default value of this argument is `v1`.  **If you want to run a test locally, you probably want to use `runci-local.sh`, described below.**
 
 ### Versioning the tests
 
@@ -22,9 +22,10 @@ The tests are defined in subdirectories, one for each version. Amongst other fil
 * `conftest.py`: `pytest` test fixtures that to be shared across all test files.
 * `test_*.py`: Test files. Any file with this prefix is a `pytest` test file and will be run in the test.
 * `create_tables.py`: Library to create the DynamoDB tables.
-* `music.py`: Python client library for the music service. Definition of a corresponding `user.py` for the user service is left as an exercise.
+* `music.py`: Python client library for the music service.
+* `playlist.py`: Python client library for the playlist service.
 
-The three application services, S1, S2, and DB, are defined in their respective directories. The appropriate directories are specified in `compose-tpl.yaml`.
+The four application services, S1, S2, S3 and DB, are defined in their respective directories. The appropriate directories are specified in `compose-tpl.yaml`.
 
 ## Running CI locally
 
@@ -36,7 +37,7 @@ When running CI tests locally, whether by `runci.sh` or `runch-local.sh` (or any
 
 * `ci_db:latest`
 * `ci_s1:latest`
-* `ci_s2:latest`
+* `ci_s2:latest` or `ci_s3:latest`
 * `ci_test:latest`
 
 You will probably want to remove these (via `docker image rm`) once you are done.

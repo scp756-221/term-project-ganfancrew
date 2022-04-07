@@ -40,15 +40,6 @@ def pytest_addoption(parser):
         help="Port number of user service."
        )
     parser.addoption(
-        '--music_address',
-        help="DNS name or IP address of music service."
-        )
-    parser.addoption(
-        '--music_port',
-        type=int,
-        help="Port number of music service."
-        )
-    parser.addoption(
         '--playlist_address',
         help="DNS name or IP address of playlist service."
         )
@@ -60,8 +51,8 @@ def pytest_addoption(parser):
     parser.addoption(
         '--table_suffix',
         help="Suffix to add to table names (not including leading "
-             "'-').  If suffix is 'scp756-2022', the music table "
-             "will be 'Music-scp756-2022'."
+             "'-').  If suffix is 'scp756-2022', the playlist table "
+             "will be 'Playlist-scp756-2022'."
         )
 
 
@@ -73,16 +64,6 @@ def user_address(request):
 @pytest.fixture
 def user_port(request):
     return request.config.getoption('--user_port')
-
-
-@pytest.fixture
-def music_address(request):
-    return request.config.getoption('--music_address')
-
-
-@pytest.fixture
-def music_port(request):
-    return request.config.getoption('--music_port')
 
 
 @pytest.fixture
@@ -104,12 +85,6 @@ def table_suffix(request):
 def user_url(request, user_address, user_port):
     return "http://{}:{}/api/v1/user/".format(
         user_address, user_port)
-
-
-@pytest.fixture
-def music_url(request, music_address, music_port):
-    return "http://{}:{}/api/v1/music/".format(
-        music_address, music_port)
 
 
 @pytest.fixture
@@ -184,9 +159,8 @@ def setup(args):
         args.dynamodb_region,
         args.access_key_id,
         args.secret_access_key,
-        'Music-' + args.table_suffix,
-        'User-' + args.table_suffix,
-        'Playlist-' + args.table_suffix
+        'Playlist-' + args.table_suffix,
+        'User-' + args.table_suffix
     )
 
 

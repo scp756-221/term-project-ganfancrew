@@ -24,6 +24,6 @@ else
   ver=v1
 fi
 
-./clear-ci-images.sh
+./clear-ci-images.sh ${ver}
 ./runci.sh ${ver}
 
