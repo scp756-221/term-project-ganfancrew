@@ -28,11 +28,30 @@ class Playlist():
         self._url = url
         self._auth = auth
 
-    def read_playlist(self, playlist_title):
-        r = requests.get(
-            self._url + playlist_title,
+    # def read_playlist(self, playlist_title):
+    #     r = requests.get(
+    #         self._url,
+    #         json={'Artist': artist,
+    #               'SongTitle': song,
+    #               'PlaylistTitle': playlist_title},
+    #         headers={'Authorization': self._auth}
+    #         )
+        
+    #     return r.status_code, r.json()['music_id']
+    
+    def add_song(self, artist, song, playlist_title):
+        r = requests.post(
+            self._url,
+            json={'Artist': artist,
+                  'SongTitle': song,
+                  'PlaylistTitle': playlist_title},
             headers={'Authorization': self._auth}
             )
-        if r.status_code != 200:
-            return r.status_code, None
-        return r.status_code
+        
+        return r.status_code, r.json()['music_id']
+    
+    def delete_song(self, playlist_title, m_id):
+        requests.delete(
+            self._url + playlist_title + '/' + m_id,
+            headers={'Authorization': self._auth}
+        )
