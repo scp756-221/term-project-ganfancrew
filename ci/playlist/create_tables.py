@@ -75,9 +75,11 @@ def create_tables(url, region, access_key_id, secret_access_key,
     )
     pt = dynamodb.create_table(
         TableName=playlist,
-        AttributeDefinitions=[{
-            "AttributeName": "music_id", "AttributeType": "S"}],
-        KeySchema=[{"AttributeName": "music_id", "KeyType": "HASH"}],
+        AttributeDefinitions=[
+            {"AttributeName": "music_id", "AttributeType": "S"},
+            {"AttributeName": "PlaylistTitle", "AttributeType": "S"}],
+        KeySchema=[{"AttributeName": "music_id", "KeyType": "HASH"},
+                   {"AttributeName": "PlaylistTitle", "KeyType": "RANGE"}],
         ProvisionedThroughput={
             "ReadCapacityUnits": 5, "WriteCapacityUnits": 5}
     )
