@@ -18,11 +18,130 @@
             }
           ],
           "ProvisionedThroughput": {
-            "ReadCapacityUnits": "5",
-            "WriteCapacityUnits": "5"
+            "ReadCapacityUnits": "500",
+            "WriteCapacityUnits": "500"
           }
         }
       },
+        "MusicScalingRole": {
+          "Type": "AWS::IAM::Role",
+          "Properties": {
+            "AssumeRolePolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow", 
+                  "Principal": { 
+                    "Service": [
+                      "application-autoscaling.amazonaws.com"
+                    ]
+                  },
+                  "Action": [
+                    "sts:AssumeRole"
+                  ]
+                }
+              ]
+            },
+            "Path": "/",
+            "Policies": [
+              {  
+                "PolicyName": "root",
+                "PolicyDocument": {
+                  "Version": "2012-10-17",
+                  "Statement": [
+                    {
+                      "Effect": "Allow",
+                      "Action": [
+                        "dynamodb:DescribeTable",
+                        "dynamodb:UpdateTable",
+                        "cloudwatch:PutMetricAlarm",
+                        "cloudwatch:DescribeAlarms",
+                        "cloudwatch:GetMetricStatistics",
+                        "cloudwatch:SetAlarmState",
+                        "cloudwatch:DeleteAlarms"
+                      ],
+                      "Resource": "*"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },  
+          "MusicWriteCapacityScalableTarget": {
+              "Type": "AWS::ApplicationAutoScaling::ScalableTarget",
+              "Properties": {
+                "MaxCapacity": 5000,
+                "MinCapacity": 500,
+                "ResourceId": { "Fn::Join": [
+                    "/",
+                    [
+                      "table",
+                      { "Ref": "tableMusic" }
+                    ]
+                  ] },
+                  "RoleARN": {
+                    "Fn::GetAtt": ["MusicScalingRole", "Arn"]
+                  },
+                "ScalableDimension": "dynamodb:table:WriteCapacityUnits",
+                "ServiceNamespace": "dynamodb"
+              }
+            },
+        "MusicWriteScalingPolicy": {
+          "Type": "AWS::ApplicationAutoScaling::ScalingPolicy",
+          "Properties": {
+            "PolicyName": "WriteAutoScalingPolicy",
+            "PolicyType": "TargetTrackingScaling",
+            "ScalingTargetId": {
+              "Ref": "MusicWriteCapacityScalableTarget"
+            },
+            "TargetTrackingScalingPolicyConfiguration": {
+              "TargetValue": 70,
+              "ScaleInCooldown": 0,
+              "ScaleOutCooldown": 2,
+              "PredefinedMetricSpecification": {
+                "PredefinedMetricType": "DynamoDBWriteCapacityUtilization"
+              }
+            }
+          }
+        }, 
+          "MusicReadCapacityScalableTarget": {
+            "Type": "AWS::ApplicationAutoScaling::ScalableTarget",
+            "Properties": {
+              "MaxCapacity": 5000,
+              "MinCapacity": 500,
+              "ResourceId": { "Fn::Join": [
+                  "/",
+                  [
+                    "table",
+                    { "Ref": "tableMusic" }
+                  ]
+                ] },
+                "RoleARN": {
+                  "Fn::GetAtt": ["MusicScalingRole", "Arn"]
+                },
+              "ScalableDimension": "dynamodb:table:ReadCapacityUnits",
+              "ServiceNamespace": "dynamodb"
+            }
+          },
+      "MusicReadScalingPolicy": {
+        "Type": "AWS::ApplicationAutoScaling::ScalingPolicy",
+        "Properties": {
+          "PolicyName": "ReadAutoScalingPolicy",
+          "PolicyType": "TargetTrackingScaling",
+          "ScalingTargetId": {
+            "Ref": "MusicReadCapacityScalableTarget"
+          },
+          "TargetTrackingScalingPolicyConfiguration": {
+            "TargetValue": 70,
+            "ScaleInCooldown": 0,
+            "ScaleOutCooldown": 2,
+            "PredefinedMetricSpecification": {
+              "PredefinedMetricType": "DynamoDBReadCapacityUtilization"
+              }
+            }
+          }
+        },
       "tablePlaylist": {
         "Type": "AWS::DynamoDB::Table",
         "Properties": {
@@ -48,11 +167,130 @@
             }
           ],
           "ProvisionedThroughput": {
-            "ReadCapacityUnits": "5",
-            "WriteCapacityUnits": "5"
+            "ReadCapacityUnits": "500",
+            "WriteCapacityUnits": "500"
           }
         }
       },
+        "PlaylistScalingRole": {
+          "Type": "AWS::IAM::Role",
+          "Properties": {
+            "AssumeRolePolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow", 
+                  "Principal": { 
+                    "Service": [
+                      "application-autoscaling.amazonaws.com"
+                    ]
+                  },
+                  "Action": [
+                    "sts:AssumeRole"
+                  ]
+                }
+              ]
+            },
+            "Path": "/",
+            "Policies": [
+              {  
+                "PolicyName": "root",
+                "PolicyDocument": {
+                  "Version": "2012-10-17",
+                  "Statement": [
+                    {
+                      "Effect": "Allow",
+                      "Action": [
+                        "dynamodb:DescribeTable",
+                        "dynamodb:UpdateTable",
+                        "cloudwatch:PutMetricAlarm",
+                        "cloudwatch:DescribeAlarms",
+                        "cloudwatch:GetMetricStatistics",
+                        "cloudwatch:SetAlarmState",
+                        "cloudwatch:DeleteAlarms"
+                      ],
+                      "Resource": "*"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }, 
+          "PlaylistWriteCapacityScalableTarget": {
+            "Type": "AWS::ApplicationAutoScaling::ScalableTarget",
+            "Properties": {
+              "MaxCapacity": 5000,
+              "MinCapacity": 500,
+              "ResourceId": { "Fn::Join": [
+                  "/",
+                  [
+                    "table",
+                    { "Ref": "tablePlaylist" }
+                  ]
+                ] },
+                "RoleARN": {
+                  "Fn::GetAtt": ["PlaylistScalingRole", "Arn"]
+                },
+              "ScalableDimension": "dynamodb:table:WriteCapacityUnits",
+              "ServiceNamespace": "dynamodb"
+            }
+          },
+      "PlaylistWriteScalingPolicy": {
+        "Type": "AWS::ApplicationAutoScaling::ScalingPolicy",
+        "Properties": {
+          "PolicyName": "WriteAutoScalingPolicy",
+          "PolicyType": "TargetTrackingScaling",
+          "ScalingTargetId": {
+            "Ref": "PlaylistWriteCapacityScalableTarget"
+          },
+          "TargetTrackingScalingPolicyConfiguration": {
+            "TargetValue": 70,
+            "ScaleInCooldown": 0,
+            "ScaleOutCooldown": 2,
+            "PredefinedMetricSpecification": {
+              "PredefinedMetricType": "DynamoDBWriteCapacityUtilization"
+            }
+          }
+        }
+      },   
+          "PlaylistReadCapacityScalableTarget": {
+              "Type": "AWS::ApplicationAutoScaling::ScalableTarget",
+              "Properties": {
+                "MaxCapacity": 5000,
+                "MinCapacity": 500,
+                "ResourceId": { "Fn::Join": [
+                    "/",
+                    [
+                      "table",
+                      { "Ref": "tablePlaylist" }
+                    ]
+                  ] },
+                  "RoleARN": {
+                    "Fn::GetAtt": ["PlaylistScalingRole", "Arn"]
+                  },
+                "ScalableDimension": "dynamodb:table:ReadCapacityUnits",
+                "ServiceNamespace": "dynamodb"
+              }
+            },
+        "PlaylistReadScalingPolicy": {
+          "Type": "AWS::ApplicationAutoScaling::ScalingPolicy",
+          "Properties": {
+            "PolicyName": "ReadAutoScalingPolicy",
+            "PolicyType": "TargetTrackingScaling",
+            "ScalingTargetId": {
+              "Ref": "PlaylistReadCapacityScalableTarget"
+            },
+            "TargetTrackingScalingPolicyConfiguration": {
+              "TargetValue": 70,
+              "ScaleInCooldown": 0,
+              "ScaleOutCooldown": 2,
+              "PredefinedMetricSpecification": {
+                "PredefinedMetricType": "DynamoDBReadCapacityUtilization"
+              }
+            }
+          }
+        },  
       "tableUsers": {
         "Type": "AWS::DynamoDB::Table",
         "Properties": {
@@ -70,11 +308,130 @@
             }
           ],
           "ProvisionedThroughput": {
-            "ReadCapacityUnits": "5",
-            "WriteCapacityUnits": "5"
+            "ReadCapacityUnits": "500",
+            "WriteCapacityUnits": "500"
           }
         }
-      }
-    },
-    "Description": "DynamoDB tables for ZZ-AWS-ACCESS-KEY-ID"
+      },
+        "UsersScalingRole": {
+          "Type": "AWS::IAM::Role",
+          "Properties": {
+            "AssumeRolePolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Effect": "Allow", 
+                  "Principal": { 
+                    "Service": [
+                      "application-autoscaling.amazonaws.com"
+                    ]
+                  },
+                  "Action": [
+                    "sts:AssumeRole"
+                  ]
+                }
+              ]
+            },
+            "Path": "/",
+            "Policies": [
+              {  
+                "PolicyName": "root",
+                "PolicyDocument": {
+                  "Version": "2012-10-17",
+                  "Statement": [
+                    {
+                      "Effect": "Allow",
+                      "Action": [
+                        "dynamodb:DescribeTable",
+                        "dynamodb:UpdateTable",
+                        "cloudwatch:PutMetricAlarm",
+                        "cloudwatch:DescribeAlarms",
+                        "cloudwatch:GetMetricStatistics",
+                        "cloudwatch:SetAlarmState",
+                        "cloudwatch:DeleteAlarms"
+                      ],
+                      "Resource": "*"
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }, 
+          "UsersWriteCapacityScalableTarget": {
+            "Type": "AWS::ApplicationAutoScaling::ScalableTarget",
+            "Properties": {
+              "MaxCapacity": 5000,
+              "MinCapacity": 500,
+              "ResourceId": { "Fn::Join": [
+                  "/",
+                  [
+                    "table",
+                    { "Ref": "tableUsers" }
+                  ]
+                ] },
+                "RoleARN": {
+                  "Fn::GetAtt": ["UsersScalingRole", "Arn"]
+                },
+              "ScalableDimension": "dynamodb:table:WriteCapacityUnits",
+              "ServiceNamespace": "dynamodb"
+            }
+          },
+      "UsersWriteScalingPolicy": {
+        "Type": "AWS::ApplicationAutoScaling::ScalingPolicy",
+        "Properties": {
+          "PolicyName": "WriteAutoScalingPolicy",
+          "PolicyType": "TargetTrackingScaling",
+          "ScalingTargetId": {
+            "Ref": "UsersWriteCapacityScalableTarget"
+          },
+          "TargetTrackingScalingPolicyConfiguration": {
+            "TargetValue": 70,
+            "ScaleInCooldown": 0,
+            "ScaleOutCooldown": 2,
+            "PredefinedMetricSpecification": {
+              "PredefinedMetricType": "DynamoDBWriteCapacityUtilization"
+            }
+          }
+        }
+      },   
+          "UsersReadCapacityScalableTarget": {
+             "Type": "AWS::ApplicationAutoScaling::ScalableTarget",
+              "Properties": {
+                "MaxCapacity": 5000,
+                "MinCapacity": 500,
+                "ResourceId": { "Fn::Join": [
+                    "/",
+                    [
+                      "table",
+                      { "Ref": "tableUsers" }
+                    ]
+                  ] },
+                  "RoleARN": {
+                    "Fn::GetAtt": ["UsersScalingRole", "Arn"]
+                  },
+                "ScalableDimension": "dynamodb:table:ReadCapacityUnits",
+                "ServiceNamespace": "dynamodb"
+              }
+            },
+        "UsersReadScalingPolicy": {
+          "Type": "AWS::ApplicationAutoScaling::ScalingPolicy",
+          "Properties": {
+            "PolicyName": "ReadAutoScalingPolicy",
+            "PolicyType": "TargetTrackingScaling",
+            "ScalingTargetId": {
+              "Ref": "UsersReadCapacityScalableTarget"
+            },
+            "TargetTrackingScalingPolicyConfiguration": {
+              "TargetValue": 70,
+              "ScaleInCooldown": 0,
+              "ScaleOutCooldown": 2,
+              "PredefinedMetricSpecification": {
+                "PredefinedMetricType": "DynamoDBReadCapacityUtilization"
+              }
+            }
+          }
+        }  
+      },
+    "Description": "DynamoDB tables for AKIAX3YOS64NO46EK7F6"
   }

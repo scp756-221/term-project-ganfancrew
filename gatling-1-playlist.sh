@@ -9,4 +9,3 @@ docker container run --detach --rm \
   --label gatling \
   ghcr.io/scp-2021-jan-cmpt-756/gatling:3.4.2 \
   -s proj756.ReadPlaylistSim
-  
