@@ -369,3 +369,31 @@ image: showcontext registry-login
 	head -n 1 __header
 	cat __content
 	rm __content __header
+
+# Simulate failures and recovers from them
+orig: db_orig, s1_orig, s2_orig, s3_orig
+
+db_orig:
+	$(KC) -n $(APP_NS) apply -f cluster/db-vs.yaml | tee -a $(LOG_DIR)/db.log
+
+s1_orig:
+	$(KC) -n $(APP_NS) apply -f cluster/s1-vs.yaml | tee -a $(LOG_DIR)/s1.log
+
+s2_orig:
+	$(KC) -n $(APP_NS) apply -f cluster/s2-vs-v2.yaml | tee -a $(LOG_DIR)/s2.log
+
+s3_orig:
+	$(KC) -n $(APP_NS) apply -f cluster/s3-vs.yaml | tee -a $(LOG_DIR)/s3.log
+
+# Simulate abort
+db_fault:
+	$(KC) -n $(APP_NS) apply -f cluster/db-vs-fault.yaml | tee -a $(LOG_DIR)/db.log
+
+s1_fault:
+	$(KC) -n $(APP_NS) apply -f cluster/s1-vs-fault.yaml | tee -a $(LOG_DIR)/s1.log
+
+s2_fault:
+	$(KC) -n $(APP_NS) apply -f cluster/s2-vs-fault.yaml | tee -a $(LOG_DIR)/s2.log
+
+s3_fault:
+	$(KC) -n $(APP_NS) apply -f cluster/s3-vs-fault.yaml | tee -a $(LOG_DIR)/s3.log
