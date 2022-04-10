@@ -176,41 +176,43 @@ make -f eks.mak stop
 ~~~
 
 
-### 6. Kiali
-1. Print the Grafana URL & Kiali URL
+### 6. Scale application and platform (with heavy loads)
+1. Set db replica to 10
 ~~~
-make -f k8s.mak grafana-url
-~~~
-~~~
-make -f k8s.mak kiali-url
+kubectl -n c756ns scale deployment/cmpt756db  --replicas=10
 ~~~
 
-2. Start gatling 
+2. Increase nodes to 5 and set s1, s2, s3 replica to 5 
 ~~~
-./gatling-10-music.sh
-~~~
-~~~
-./gatling-10-playlist.sh
+eksctl scale nodegroup --name=worker-nodes --cluster aws756 --nodes 5
 ~~~
 ~~~
-./gatling-10-user.sh
+kubectl -n c756ns scale deployment/cmpt756s1 --replicas=5
+~~~
+~~~
+kubectl -n c756ns scale deployment/cmpt756s3-v1 --replicas=5
+~~~
+~~~
+kubectl -n c756ns scale deployment/cmpt756s2-v2 --replicas=5
 ~~~
 (add more if neccessary)
 
-3. Kiali graph
-Namespaces: c756ns
-Graph type: Versioned app graph
-Display interval: Last 1m
-Refresh interval: Every 30s
-Display:
-Show Edge Labels: Traffic Rate
-Show: Compressed Hide, Operation Nodes, Service Nodes, Traffic Animation
-Show Badges: Virtual Services
+3. Increase dynamodb tables' read and write capacity to 500
+~~~
+aws dynamodb update-table --table-name Music-ZZ-REG-ID --provisioned-throughput ReadCapacityUnits=500,WriteCapacityUnits=500
+~~~
+~~~
+aws dynamodb update-table --table-name User-ZZ-REG-ID --provisioned-throughput ReadCapacityUnits=500,WriteCapacityUnits=500
+~~~
+~~~
+aws dynamodb update-table --table-name Playlist-ZZ-REG-ID --provisioned-throughput ReadCapacityUnits=500,WriteCapacityUnits=500
+~~~
 
 4. Stop gatling
 ~~~
 tools/kill-gatling.sh
 ~~~
+
 5. Close cluster
 ~~~
 make -f eks.mak stop
