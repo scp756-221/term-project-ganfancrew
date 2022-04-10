@@ -195,7 +195,6 @@ kubectl -n c756ns scale deployment/cmpt756s3-v1 --replicas=5
 ~~~
 kubectl -n c756ns scale deployment/cmpt756s2-v2 --replicas=5
 ~~~
-(add more if neccessary)
 
 3. Increase dynamodb tables' read and write capacity to 500
 ~~~
