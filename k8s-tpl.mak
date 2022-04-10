@@ -296,21 +296,21 @@ s1: $(LOG_DIR)/s1.repo.log cluster/s1.yaml cluster/s1-sm.yaml cluster/s1-vs.yaml
 	$(KC) -n $(APP_NS) apply -f cluster/s1.yaml | tee $(LOG_DIR)/s1.log
 	$(KC) -n $(APP_NS) apply -f cluster/s1-sm.yaml | tee -a $(LOG_DIR)/s1.log
 	$(KC) -n $(APP_NS) apply -f cluster/s1-vs.yaml | tee -a $(LOG_DIR)/s1.log
-	$(KC) -n $(APP_NS) autoscale deployment/cmpt756s1 --min=10 --max=100 || true
+# $(KC) -n $(APP_NS) autoscale deployment/cmpt756s1 --min=10 --max=100 || true
 
 # Update S2 and associated monitoring, rebuilding if necessary
 s2: rollout-s2 cluster/s2-svc.yaml cluster/s2-sm.yaml cluster/s2-vs-v2.yaml
 	$(KC) -n $(APP_NS) apply -f cluster/s2-svc.yaml | tee $(LOG_DIR)/s2.log
 	$(KC) -n $(APP_NS) apply -f cluster/s2-sm.yaml | tee -a $(LOG_DIR)/s2.log
 	$(KC) -n $(APP_NS) apply -f cluster/s2-vs-v2.yaml | tee -a $(LOG_DIR)/s2.log
-	$(KC) -n $(APP_NS) autoscale deployment/cmpt756s2-$(S2_VER) --min=10 --max=100 || true
+# $(KC) -n $(APP_NS) autoscale deployment/cmpt756s2-$(S2_VER) --min=10 --max=100 || true
 
 # Update S3 and associated monitoring, rebuilding if necessary
 s3: rollout-s3 cluster/s3-svc.yaml cluster/s3-sm.yaml cluster/s3-vs.yaml
 	$(KC) -n $(APP_NS) apply -f cluster/s3-svc.yaml | tee $(LOG_DIR)/s3.log
 	$(KC) -n $(APP_NS) apply -f cluster/s3-sm.yaml | tee -a $(LOG_DIR)/s3.log
 	$(KC) -n $(APP_NS) apply -f cluster/s3-vs.yaml | tee -a $(LOG_DIR)/s3.log
-	$(KC) -n $(APP_NS) autoscale deployment/cmpt756s3-$(S3_VER) --min=10 --max=100 || true
+# $(KC) -n $(APP_NS) autoscale deployment/cmpt756s3-$(S3_VER) --min=10 --max=100 || true
 
 # Update DB and associated monitoring, rebuilding if necessary
 db: $(LOG_DIR)/db.repo.log cluster/awscred.yaml cluster/dynamodb-service-entry.yaml cluster/db.yaml cluster/db-sm.yaml cluster/db-vs.yaml
@@ -319,7 +319,7 @@ db: $(LOG_DIR)/db.repo.log cluster/awscred.yaml cluster/dynamodb-service-entry.y
 	$(KC) -n $(APP_NS) apply -f cluster/db.yaml | tee -a $(LOG_DIR)/db.log
 	$(KC) -n $(APP_NS) apply -f cluster/db-sm.yaml | tee -a $(LOG_DIR)/db.log
 	$(KC) -n $(APP_NS) apply -f cluster/db-vs.yaml | tee -a $(LOG_DIR)/db.log
-	$(KC) -n $(APP_NS) autoscale deployment/cmpt756db --min=10 --max=100 || true
+# $(KC) -n $(APP_NS) autoscale deployment/cmpt756db --min=10 --max=100 || true
 
 # Build & push the images up to the CR
 cri: $(LOG_DIR)/s1.repo.log $(LOG_DIR)/s2-$(S2_VER).repo.log $(LOG_DIR)/s3-$(S3_VER).repo.log $(LOG_DIR)/db.repo.log
@@ -370,7 +370,7 @@ image: showcontext registry-login
 	cat __content
 	rm __content __header
 
-# Simulate failures and recovers from them
+# Simulate abort and recover from it
 orig: db_orig, s1_orig, s2_orig, s3_orig
 
 db_orig:
@@ -397,3 +397,28 @@ s2_fault:
 
 s3_fault:
 	$(KC) -n $(APP_NS) apply -f cluster/s3-vs-fault.yaml | tee -a $(LOG_DIR)/s3.log
+
+# Simulate delay and recover from it
+recov: s1_recov, s2_recov, s3_recov
+
+s1_recov:
+	$(KC) -n $(APP_NS) apply -f cluster/s1-vs-delay-recover.yaml | tee -a $(LOG_DIR)/s1.log
+
+s2_recov:
+	$(KC) -n $(APP_NS) apply -f cluster/s2-vs-delay-recover.yaml | tee -a $(LOG_DIR)/s2.log
+
+s3_recov:
+	$(KC) -n $(APP_NS) apply -f cluster/s2-vs-delay-recover.yaml | tee -a $(LOG_DIR)/s3.log
+
+# Simulate delay
+db_delay:
+	$(KC) -n $(APP_NS) apply -f cluster/db-vs-delay.yaml | tee -a $(LOG_DIR)/db.log
+
+s1_delay:
+	$(KC) -n $(APP_NS) apply -f cluster/s1-vs-delay.yaml | tee -a $(LOG_DIR)/s1.log
+
+s2_delay:
+	$(KC) -n $(APP_NS) apply -f cluster/s2-vs-delay.yaml | tee -a $(LOG_DIR)/s2.log
+
+s3_delay:
+	$(KC) -n $(APP_NS) apply -f cluster/s3-vs-delay.yaml | tee -a $(LOG_DIR)/s3.log
