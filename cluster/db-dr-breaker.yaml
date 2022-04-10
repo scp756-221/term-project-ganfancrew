@@ -1,9 +1,9 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
-  name: cmpt756s3
+  name: cmpt756db
 spec:
-  host: cmpt756s3
+  host: cmpt756db
   subsets:
   - name: v1
     labels:
@@ -19,4 +19,4 @@ spec:
       baseEjectionTime: 15s
       consecutive5xxErrors: 1
       interval: 5s
-      maxEjectionPercent: 100
+      maxEjectionPercent: 50
