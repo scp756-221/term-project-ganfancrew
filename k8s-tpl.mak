@@ -374,51 +374,58 @@ image: showcontext registry-login
 orig: db_orig, s1_orig, s2_orig, s3_orig
 
 db_orig:
-	$(KC) -n $(APP_NS) apply -f cluster/db-vs.yaml | tee -a $(LOG_DIR)/db.log
+	$(KC) -n $(APP_NS) apply -f cluster/db-vs.yaml
 
 s1_orig:
-	$(KC) -n $(APP_NS) apply -f cluster/s1-vs.yaml | tee -a $(LOG_DIR)/s1.log
+	$(KC) -n $(APP_NS) apply -f cluster/s1-vs.yaml
 
 s2_orig:
-	$(KC) -n $(APP_NS) apply -f cluster/s2-vs-v2.yaml | tee -a $(LOG_DIR)/s2.log
+	$(KC) -n $(APP_NS) apply -f cluster/s2-vs-v2.yaml
 
 s3_orig:
-	$(KC) -n $(APP_NS) apply -f cluster/s3-vs.yaml | tee -a $(LOG_DIR)/s3.log
+	$(KC) -n $(APP_NS) apply -f cluster/s3-vs.yaml
 
 # Simulate abort
 db_fault:
-	$(KC) -n $(APP_NS) apply -f cluster/db-vs-fault.yaml | tee -a $(LOG_DIR)/db.log
+	$(KC) -n $(APP_NS) apply -f cluster/db-vs-fault.yaml
 
 s1_fault:
-	$(KC) -n $(APP_NS) apply -f cluster/s1-vs-fault.yaml | tee -a $(LOG_DIR)/s1.log
+	$(KC) -n $(APP_NS) apply -f cluster/s1-vs-fault.yaml
 
 s2_fault:
-	$(KC) -n $(APP_NS) apply -f cluster/s2-vs-fault.yaml | tee -a $(LOG_DIR)/s2.log
+	$(KC) -n $(APP_NS) apply -f cluster/s2-vs-fault.yaml
 
 s3_fault:
-	$(KC) -n $(APP_NS) apply -f cluster/s3-vs-fault.yaml | tee -a $(LOG_DIR)/s3.log
+	$(KC) -n $(APP_NS) apply -f cluster/s3-vs-fault.yaml
 
 # Simulate delay and recover from it
 recov: s1_recov, s2_recov, s3_recov
 
 s1_recov:
-	$(KC) -n $(APP_NS) apply -f cluster/s1-vs-delay-recover.yaml | tee -a $(LOG_DIR)/s1.log
+	$(KC) -n $(APP_NS) apply -f cluster/s1-vs-delay-recover.yaml
 
 s2_recov:
-	$(KC) -n $(APP_NS) apply -f cluster/s2-vs-delay-recover.yaml | tee -a $(LOG_DIR)/s2.log
+	$(KC) -n $(APP_NS) apply -f cluster/s2-vs-delay-recover.yaml
 
 s3_recov:
-	$(KC) -n $(APP_NS) apply -f cluster/s2-vs-delay-recover.yaml | tee -a $(LOG_DIR)/s3.log
+	$(KC) -n $(APP_NS) apply -f cluster/s2-vs-delay-recover.yaml
 
 # Simulate delay
 db_delay:
-	$(KC) -n $(APP_NS) apply -f cluster/db-vs-delay.yaml | tee -a $(LOG_DIR)/db.log
+	$(KC) -n $(APP_NS) apply -f cluster/db-vs-delay.yaml
 
 s1_delay:
-	$(KC) -n $(APP_NS) apply -f cluster/s1-vs-delay.yaml | tee -a $(LOG_DIR)/s1.log
+	$(KC) -n $(APP_NS) apply -f cluster/s1-vs-delay.yaml
 
 s2_delay:
-	$(KC) -n $(APP_NS) apply -f cluster/s2-vs-delay.yaml | tee -a $(LOG_DIR)/s2.log
+	$(KC) -n $(APP_NS) apply -f cluster/s2-vs-delay.yaml
 
 s3_delay:
-	$(KC) -n $(APP_NS) apply -f cluster/s3-vs-delay.yaml | tee -a $(LOG_DIR)/s3.log
+	$(KC) -n $(APP_NS) apply -f cluster/s3-vs-delay.yaml
+
+# Circuit Breaking
+s1_break:
+	$(KC) -n $(APP_NS) apply -f cluster/s1-dr-breaker.yaml
+
+s3_break:
+	$(KC) -n $(APP_NS) apply -f cluster/s3-dr-breaker.yaml
