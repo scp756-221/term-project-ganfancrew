@@ -118,6 +118,9 @@ Select “Browse” from the menu. This will bring up a list of dashboards. Clic
 (Make sure to start a new terminal window and you're not in tools/shell.sh)
 Send initial loads to the system
 ~~~
+./gatling-1-user.sh
+~~~
+~~~
 ./gatling-10-music.sh
 ~~~
 ~~~
