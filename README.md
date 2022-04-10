@@ -103,7 +103,7 @@ make PORT=80 SERVER=EXTERNAL-IP run-pcli
 k9s
 ~~~
 
-### 5. Grafana
+### 5. Grafana & Kiali
 1. Print the Grafana URL
 ~~~
 make -f k8s.mak grafana-url
@@ -150,12 +150,27 @@ Send heavy loads to the system
 ./gatling-260-user.sh
 ~~~
 
-4. Stop gatling
+4. Print the Kiali URL
+~~~
+make -f k8s.mak kiali-url
+~~~
+
+5. Kiali graph
+Namespaces: c756ns
+Graph type: Versioned app graph
+Display interval: Last 1m
+Refresh interval: Every 30s
+Display:
+Show Edge Labels: Traffic Rate
+Show: Compressed Hide, Operation Nodes, Service Nodes, Traffic Animation
+Show Badges: Virtual Services
+
+6. Stop gatling
 ~~~
 tools/kill-gatling.sh
 ~~~
 
-5. Close cluster
+7. Close cluster
 ~~~
 make -f eks.mak stop
 ~~~
