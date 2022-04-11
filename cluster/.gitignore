@@ -14,3 +14,4 @@ awscred.yaml
 tpl-vars.txt
 *-token.txt
 cloudformationdynamodb.json
+cloudformationdynamodb-autoscaling.json
