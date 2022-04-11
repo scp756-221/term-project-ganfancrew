@@ -429,3 +429,6 @@ s1_break:
 
 s3_break:
 	$(KC) -n $(APP_NS) apply -f cluster/s3-dr-breaker.yaml
+
+db_break:
+	$(KC) -n $(APP_NS) apply -f cluster/db-dr-breaker.yaml
