@@ -1,6 +1,6 @@
 """
 SFU CMPT 756
-Sample application---music service.
+application---playlist service.
 """
 
 # Standard library modules

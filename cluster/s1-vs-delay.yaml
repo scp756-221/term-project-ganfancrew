@@ -21,4 +21,4 @@ spec:
         host: cmpt756s1
         port:
           number: 30000
-    timeout: 10s
+    timeout: 9s
