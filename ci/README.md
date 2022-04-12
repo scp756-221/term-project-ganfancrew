@@ -54,10 +54,3 @@ The file input to `docker-compose` is templated.  The reference version is `comp
 to regenerate the `compose.yaml` file that will actually define the test.
 
 **Do not directly modify `compose.yaml`.  Only modify `compose-tpl.yaml` and run `make` to regenerate `compose.yaml`.**
-
-## Utility scripts
-
-The following scripts are simple utilities that may prove useful:
-
-* `create-local-tables.sh`: Create the two DynamoDB tables in a local instance. This does not have to be done for a regular test, in which the Python code creates the tables.  But when running manual tests, you may use this script to create the tables.
-* `quick-test.sh`: A quick test of a running system, this creates a single song on the music table.  Because the music system accepts multiple "creates" of the same song (giving each instance a different UUID), you can call this multiple times without error.
